@@ -12,11 +12,12 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS files;
 
 CREATE TABLE files (
-    id,
-    file_name,
-    file_type,
-    time_stamp,
-    user,
-    department,
-    project,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user TEXT NOT NULL,
+    department TEXT NOT NULL, -- mandatory
+    project TEXT, -- optional
 )
