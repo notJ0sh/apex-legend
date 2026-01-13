@@ -117,3 +117,9 @@ def home():
 def register():
     # sends the user to the registration page
     return render_template('register.html')
+
+
+# Run the app
+if __name__ == '__main__':
+    app.run(debug=True)
+    pass
