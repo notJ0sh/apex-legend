@@ -85,8 +85,24 @@ def close_databases(error) -> None:
 
 
 # Login screen (first screen)
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def login():
+    db = get_database(USER_DATABASE)  # connects to user database
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Check if user exists and password matches
+        user = db.execute(
+            'SELECT * FROM users WHERE username = ? AND password = ?',
+            (username, password)
+        ).fetchone()
+
+        if user is not None:
+            # redirects to homepage on successful login
+            return redirect(url_for('home'))
+
     return render_template('login.html')  # sends the user to the login page
 
 

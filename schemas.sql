@@ -4,7 +4,11 @@
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
-
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- unique identifier for each user
+    username TEXT UNIQUE NOT NULL, -- unqiue username
+    user_password TEXT NOT NULL, -- unique password
+    user_role TEXT NOT NULL, -- admin or user
+    department TEXT, -- optional (only for users with role user)
 )
 
 
