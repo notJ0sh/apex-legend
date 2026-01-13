@@ -46,8 +46,8 @@ def init_database(db_name: str) -> None:
 
         db_attr = f'_db_{db_name}'
         database = get_database(db_name)
-        with app.open_resource(f'schema.sql') as f:
-            database.executescript(f.read())
+        with app.open_resource(f'schemas.sql') as f:
+            database.cursor().executescript(f.read())
         database.commit()
 
 
