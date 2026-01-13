@@ -1,18 +1,28 @@
-<!-- Base Template for all HTML files -->
-<!-- Javascript also goes here -->
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}Apex Legend App{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
+    <nav>
+        <div class="container">
+            <h1>Navbar</h1>
+            <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+        </div>
+    </nav>
 
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // JavaScript can be added here (hot reload, etc.)
+    </script>
 </body>
 
 </html>

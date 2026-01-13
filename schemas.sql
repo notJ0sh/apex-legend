@@ -8,8 +8,8 @@ CREATE TABLE users (
     username TEXT UNIQUE NOT NULL, -- unqiue username
     user_password TEXT NOT NULL, -- unique password
     user_role TEXT NOT NULL, -- admin or user
-    department TEXT, -- optional (only for users with role user)
-)
+    department TEXT -- optional (only for users with role user)
+);
 
 
 -- Schema for files table
@@ -24,5 +24,11 @@ CREATE TABLE files (
     user TEXT NOT NULL, -- user who uploaded the file
     group_name TEXT, -- optional (only for discord)
     department TEXT NOT NULL, -- mandatory
-    project TEXT, -- optional
-)
+    project TEXT -- optional
+);
+
+
+
+-- Test data insertions
+INSERT INTO users (username, user_password, user_role, department) VALUES
+('admin', 'adminpass', 'admin', NULL);

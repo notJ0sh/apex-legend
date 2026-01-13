@@ -8,8 +8,9 @@ from flask import Flask, render_template, request, redirect, url_for, g, jsonify
 #      -----      {{{     SET UP     }}}      -----      #
 
 
-# Set up app
-app = Flask(__name__)
+# Set up app with custom templates and static folders
+app = Flask(__name__, template_folder='templates (HTML pages)',
+            static_folder='static (css styles)')
 
 # Set up databases
 USER_DATABASE = 'user_data.db'  # 1. User Database
@@ -47,7 +48,8 @@ def init_database(db_name: str) -> None:
         db_attr = f'_db_{db_name}'
         database = get_database(db_name)
         with app.open_resource(f'schemas.sql') as f:
-            database.cursor().executescript(f.read())
+            sql_script = f.read().decode('utf-8')
+            database.executescript(sql_script)
         database.commit()
 
 
@@ -84,26 +86,42 @@ def close_databases(error) -> None:
 #      -----      {{{     ROUTES (MAIN EVENTS)     }}}      -----      #
 
 
+# Instantly redirect to login screen
+
+
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
 # Login screen (first screen)
-@app.route('/', methods=['GET', 'POST'])
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     db = get_database(USER_DATABASE)  # connects to user database
+    error = None
 
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
 
-        # Check if user exists and password matches
-        user = db.execute(
-            'SELECT * FROM users WHERE username = ? AND password = ?',
-            (username, password)
-        ).fetchone()
+        if not username or not password:
+            error = 'Username and password are required.'
+        else:
+            # Check if user exists and password matches
+            user = db.execute(
+                'SELECT * FROM users WHERE username = ? AND user_password = ?',
+                (username, password)
+            ).fetchone()
 
-        if user is not None:
-            # redirects to homepage on successful login
-            return redirect(url_for('home'))
+            if user is not None:
+                # redirects to homepage on successful login
+                return redirect(url_for('home'))
+            else:
+                error = 'Invalid username or password.'
 
-    return render_template('login.html')  # sends the user to the login page
+    # sends the user to the login page
+    return render_template('login.html', error=error)
 
 
 # Homepage screen
