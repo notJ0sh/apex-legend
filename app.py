@@ -15,6 +15,8 @@ app = Flask(__name__, template_folder='templates (HTML pages)',
 # Register all routes
 register_routes(app)
 
+# Create discord bot here
+
 
 #      -----      {{{     SAFETY EVENT HANDLERS     }}}      -----      #
 
