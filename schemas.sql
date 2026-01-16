@@ -25,6 +25,7 @@ CREATE TABLE files (
     group_name TEXT, -- optional (only for discord)
     department TEXT NOT NULL, -- mandatory
     project TEXT -- optional
+    description TEXT -- optional description of the file by gemini AI
 );
 
 
