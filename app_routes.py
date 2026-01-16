@@ -1,6 +1,6 @@
 #      -----      {{{     IMPORTS     }}}      -----      #
 
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request
 from auth_user_routes import register_auth_routes
 
 #      -----      {{{     ROUTES (MAIN EVENTS)     }}}      -----      #

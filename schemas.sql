@@ -21,10 +21,14 @@ CREATE TABLE files (
     file_type TEXT NOT NULL, -- e.g., pdf, docx, png
     file_path TEXT NOT NULL, -- path where the file is stored
     time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- time of upload
-    user TEXT NOT NULL, -- user who uploaded the file
-    group_name TEXT, -- optional (only for discord)
-    department TEXT NOT NULL, -- mandatory
-    project TEXT -- optional
+    user TEXT, -- user who uploaded the file (optional, from Discord or web)
+    group_name TEXT, -- optional (Discord channel name, only for Discord)
+    department TEXT NOT NULL, -- mandatory (takes from user table for web uploads and role from discord uploads)
+    project TEXT, -- optional
+    source TEXT NOT NULL, -- source of upload: 'discord' or 'web'
+    user_id TEXT, -- optional (Discord user ID, only for Discord uploads)
+    message_id TEXT, -- optional (Discord message ID, only for Discord uploads)
+    channel_id TEXT -- optional (Discord channel ID, only for Discord uploads)
 );
 
 

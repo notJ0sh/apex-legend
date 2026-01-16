@@ -1,4 +1,5 @@
 # collector_cog.py
+from database_helpers import add_file_data
 import os
 import re
 import aiohttp
@@ -7,6 +8,14 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
+from sys import path
+from pathlib import Path
+
+# Add parent directory to path so we can import database_helpers
+parent_dir = str(Path(__file__).parent.parent)
+if parent_dir not in path:
+    path.insert(0, parent_dir)
+
 
 load_dotenv()
 
@@ -72,21 +81,43 @@ class CollectorCog(commands.Cog):
         }
         return payload
 
-    async def send_to_backend(self, payload: dict):
-        if not API_BASE_URL:
-            print("API_BASE_URL not configured, skipping send.")
-            return
+    def save_files_to_database(self, message: discord.Message, attachments_data: list[dict]):
+        """Save file data to the files table in the database."""
+        for att_data in attachments_data:
+            file_record = {
+                "file_name": att_data["filename"],
+                "file_type": att_data["content_type"] or "unknown",
+                "file_path": att_data["url"],
+                "user": message.author.name,
+                "group_name": getattr(message.channel, "name", "DM"),
+                "department": "General",  # Default department for Discord uploads
+                "source": "discord",  # Mark as Discord source
+                "user_id": str(message.author.id),  # Discord user ID
+                "message_id": str(message.id),  # Discord message ID
+                "channel_id": str(message.channel.id),  # Discord channel ID
+            }
+            try:
+                add_file_data(file_record)
+                print(
+                    f"Saved file '{att_data['filename']}' to database from Discord.")
+            except Exception as e:
+                print(f"Error saving file to database: {e}")
 
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(API_BASE_URL, json=payload) as resp:
-                    if resp.status not in (200, 201):
-                        text = await resp.text()
-                        print(f"Backend error {resp.status}: {text}")
-                    else:
-                        print("Successfully sent payload to backend.")
-        except Exception as e:
-            print(f"Error sending data to backend: {e}")
+    # async def send_to_backend(self, payload: dict):
+    #     if not API_BASE_URL:
+    #         print("API_BASE_URL not configured, skipping send.")
+    #         return
+
+    #     try:
+    #         async with aiohttp.ClientSession() as session:
+    #             async with session.post(API_BASE_URL, json=payload) as resp:
+    #                 if resp.status not in (200, 201):
+    #                     text = await resp.text()
+    #                     print(f"Backend error {resp.status}: {text}")
+    #                 else:
+    #                     print("Successfully sent payload to backend.")
+    #     except Exception as e:
+    #         print(f"Error sending data to backend: {e}")
 
     # ---------- event listener ----------
 
@@ -113,7 +144,12 @@ class CollectorCog(commands.Cog):
             f"Collecting from {message.author} in #{message.channel}: "
             f"{len(payload['attachments'])} attachments, {len(payload['links'])} links"
         )
-        await self.send_to_backend(payload)
+
+        # Save files to database
+        if has_attachments:
+            self.save_files_to_database(message, payload['attachments'])
+
+        # await self.send_to_backend(payload)
 
     # ---------- slash commands ----------
 
