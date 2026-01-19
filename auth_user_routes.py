@@ -1,6 +1,6 @@
 #      -----      {{{     IMPORTS     }}}      -----      #
 
-from flask import render_template, request, redirect, url_for
+from flask import abort, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user, current_user
 from database_helpers import get_database, USER_DATABASE
 from models import User
@@ -56,6 +56,11 @@ def register_auth_routes(app):
     # User registration route
     @app.route('/register', methods=['GET', 'POST'])
     def register():
+
+        # Only Admins can register new users (remove if u want open registration)
+        if current_user.role != 'admin':
+            abort(403)  # Forbidden
+
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')

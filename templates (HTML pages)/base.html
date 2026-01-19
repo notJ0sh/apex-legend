@@ -14,27 +14,19 @@
 </head>
 
 <body>
+    {% if current_user.is_authenticated %}
     <nav>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="container">
             <h1>Apex Legend</h1>
-            <div class="nav-links">
-                <a href="{{ url_for('home') }}" class="nav-link">Home</a>
-
-                {% if current_user.is_authenticated %}
-                <span style="margin-left: 15px;">Welcome, <strong>{{ current_user.username }}</strong></span>
-
-                {% if current_user.role == 'Admin' %}
-                <a href="/admin" class="nav-link" style="color: gold;">Admin Panel</a>
-                {% endif %}
-
-                <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="nav-link">Login</a>
-                <a href="{{ url_for('register') }}" class="nav-link">Register</a>
-                {% endif %}
-            </div>
+            <a href="{{ url_for('home') }}">Home</a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('register') }}">Create User</a>
+            <a href="/admin/manage-users">Manage Accounts</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </nav>
+    {% endif %}
 
     <main class="container">
         {% block content %}{% endblock %}
