@@ -64,6 +64,7 @@ def register_auth_routes(app):
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
+            role = request.form.get('role')
             department = request.form.get('department', None)
 
             db = get_database(USER_DATABASE)
@@ -85,7 +86,7 @@ def register_auth_routes(app):
                 db.execute(
                     '''INSERT INTO users (username, user_password, user_role, department) 
                        VALUES (?, ?, ?, ?)''',
-                    (username, password, 'user', department)
+                    (username, password, role, department)
                 )
                 db.commit()  # Save changes to the .db file
                 return redirect(url_for('login'))
