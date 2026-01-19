@@ -93,3 +93,26 @@ def add_user_data(data: dict) -> None:
 
 def add_file_data(data: dict) -> None:
     add_data(FILES_DATABASE, 'files', data)
+
+
+def get_user_by_id(user_id: int) -> dict | None:
+    """Retrieve user data by user ID."""
+    try:
+        # Try to use Flask's g object first (request context)
+        database = get_database(USER_DATABASE)
+        should_close = False
+    except RuntimeError:
+        # Fallback for outside of Flask context (e.g., Discord bot thread)
+        database = sqlite3.connect(USER_DATABASE)
+        database.row_factory = sqlite3.Row
+        should_close = True
+
+    try:
+        sql = 'SELECT * FROM users WHERE id = ?'
+        cursor = database.execute(sql, (user_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        # Only close if we created the connection outside Flask context
+        if should_close:
+            database.close()

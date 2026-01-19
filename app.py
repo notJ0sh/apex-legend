@@ -6,7 +6,9 @@ import threading
 from dotenv import load_dotenv
 
 from flask import Flask, request
-from database_helpers import ensure_databases, close_databases
+from flask_login import LoginManager
+from database_helpers import ensure_databases, close_databases, get_database, USER_DATABASE
+from models import User
 from app_routes import register_routes
 
 # Discord bot imports
@@ -15,6 +17,9 @@ from discord.ext import commands
 from discord import app_commands
 from cogs.admin_checks import has_admin_role, admin_only_check
 from cogs.bot_events import setup_bot_events
+
+# Init login manager
+login_manager = LoginManager()
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +39,13 @@ if not DISCORD_TOKEN:
 app = Flask(__name__, template_folder='templates (HTML pages)',
             static_folder='static (css styles)')
 
+# Get secret key
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "fd7gs6h9guohejtbgisfu")
+
+# Link login manager to app
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+
 # Register all routes
 register_routes(app)
 
@@ -49,8 +61,30 @@ bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents)
 # Setup bot events and commands
 setup_bot_events(bot)
 
+# How to load user
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db = get_database(USER_DATABASE)
+    user_data = db.execute(
+        'SELECT id, username, user_role, department FROM users WHERE id = ?',
+        (user_id,)
+    ).fetchone()
+
+    if user_data:
+        # These keyword names (id, username, user_role)
+        # MUST match the __init__ names in your User class
+        return User(
+            id=user_data[0],
+            username=user_data[1],
+            user_role=user_data[2],
+            department=user_data[3]
+        )
+    return None
 
 #      -----      {{{     BOT AND FLASK COORDINATION     }}}      -----      #
+
 
 # Global event loop for the bot
 bot_loop = None

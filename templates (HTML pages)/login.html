@@ -1,13 +1,18 @@
+{% extends "base.html" %}
+
 {% block title %}Login - Apex Legend{% endblock %}
 
 {% block content %}
 <div class="login-container">
     <h2>Login</h2>
+
     {% if error %}
-    <div class="error" style="color: red; margin-bottom: 15px;">
+    <div class="error"
+        style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 15px; border-radius: 5px;">
         {{ error }}
     </div>
     {% endif %}
+
     <form method="POST">
         <div>
             <label for="username">Username:</label>
@@ -17,7 +22,11 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" style="margin-top: 10px;">Login</button>
     </form>
+
+    <p style="margin-top: 15px;">
+        Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+    </p>
 </div>
 {% endblock %}
