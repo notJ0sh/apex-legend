@@ -13,4 +13,7 @@ CREATE TABLE users (
 
 -- Test data insertions
 INSERT INTO users (username, user_password, user_role, department) VALUES
-('admin', 'adminpass', 'admin', NULL);
+-- Admin user
+('admin', 'adminpass', 'admin', NULL),
+-- Standard user
+('user', 'userpass', 'user', 'sales');

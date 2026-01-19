@@ -1,7 +1,7 @@
 #      -----      {{{     IMPORTS     }}}      -----      #
 
 from flask import abort, render_template, request, redirect, url_for
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_required, login_user, logout_user, current_user
 from database_helpers import get_database, USER_DATABASE
 from models import User
 
@@ -94,3 +94,19 @@ def register_auth_routes(app):
                 return render_template('register.html', error="Registration failed.")
 
         return render_template('register.html')
+
+    # Manage users route
+    @app.route('/manage-users')
+    @login_required
+    def manage_users():
+        # SECURITY: Only admins can see this page
+        if current_user.role != 'admin':
+            abort(403)
+
+        db = get_database(USER_DATABASE)
+        # Fetch all users to display in the table
+        users = db.execute(
+            'SELECT id, username, user_role, department FROM users'
+        ).fetchall()
+
+        return render_template('manage_users.html', users=users)
