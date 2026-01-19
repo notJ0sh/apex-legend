@@ -11,6 +11,8 @@ from database_helpers import ensure_databases, close_databases, get_database, US
 from models import User
 from app_routes import register_routes
 
+import logging
+
 # Discord bot imports
 import discord
 from discord.ext import commands
@@ -41,6 +43,17 @@ app = Flask(__name__, template_folder='templates (HTML pages)',
 
 # Get secret key
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "fd7gs6h9guohejtbgisfu")
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("Logs/app_activity.txt"),  # Writes to your file
+        logging.StreamHandler()                 # Also writes to your terminal
+    ]
+)
 
 # Link login manager to app
 login_manager.init_app(app)
@@ -149,6 +162,9 @@ if __name__ == '__main__':
 
     # Start the Discord bot in background thread
     start_bot_thread()
+
+    # Initial log entry
+    logging.info("Starting Flask Web Server...")  # Added log entry
 
     # Start Flask web server on main thread
     app.run(debug=True, use_reloader=False)  # IMPORTANT: use_reloader=False

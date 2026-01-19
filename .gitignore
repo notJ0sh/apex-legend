@@ -57,3 +57,6 @@ htmlcov/
 
 # OS
 Thumbs.db
+
+# Logs (everything inside the Logs folder)
+Logs/*
