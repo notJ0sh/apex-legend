@@ -1,0 +1,52 @@
+FOR MAITRI:
+
+to use:
+- auth_user_routes.py
+- user_schena.sql
+- settings.html
+- base.html (navbar)
+- login.html
+- register.html
+- manage_users.html
+
+1. Fix login logic (whatever u wanna change u change)
+2. Fix user_schema logic (also change what u wanna change)
+3. Do settings page stuff 
+    |_ user click on settings button on navbar (base.html)
+    |_ u create the html for settings -> use JinJa so admin can do extra stuff
+
+4. can then do css stuff to make it pretty
+5. Add logs stuff if u got time
+
+
+
+
+
+
+
+
+
+
+FOR REANNE:
+
+to use:
+- app_routes.py
+- models.py
+- base.html (navbar)
+- homepage.html
+- edit-file.html
+- delete-file.html
+- add-file.html
+
+1. Add file viewing into homepage.html
+    |_ make it so that it checks user department (current_user.role -> or u can just read models.py n look at the class there)
+    |_ if admin, display all files dosent matter | if user, only display files from their department
+    |_ add a like dropdown filter or smth for both department
+    |_ Use Jinja to make it so that only admins can use the department filter but normal users cannot. (normal users can only use normal filters like file stuff idk up to u)
+    |_ edit the app_routes.py to work with ur logic (ill do a bit as like a template)
+
+2. Add html and shi to the add-file / delete-file / edit-file stuff
+    |_ check models.py for the classes and file object stuff as reference
+    |_ much easier to create an object for the file then put data there instead of a long ass dictionary or list
+
+3. Urr fix shit and add css

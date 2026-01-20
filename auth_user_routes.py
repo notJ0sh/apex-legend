@@ -26,7 +26,7 @@ def register_auth_routes(app):
             else:
                 # Fetch the user
                 curr = db.execute(
-                    'SELECT id, username, user_role FROM users WHERE username = ? AND user_password = ?',
+                    'SELECT id, username FROM users WHERE username = ? AND user_password = ?',
                     (username, password)
                 )
                 user_data = curr.fetchone()
