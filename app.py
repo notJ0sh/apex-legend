@@ -161,7 +161,7 @@ if __name__ == '__main__':
         ensure_databases(app)
 
     # Start the Discord bot in background thread
-    start_bot_thread()
+    # start_bot_thread()
 
     # Initial log entry
     logging.info("Starting Flask Web Server...")  # Added log entry
