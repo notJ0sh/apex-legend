@@ -1,6 +1,6 @@
 # collector_cog.py
 from database_helpers import add_data_from_discord
-from admin_checks import has_admin_role, admin_only_check
+from .admin_checks import admin_only_check
 import os
 import re
 import aiohttp
@@ -9,9 +9,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
-from sys import path
-from pathlib import Path
-
 
 load_dotenv()
 
@@ -70,45 +67,22 @@ class CollectorCog(commands.Cog):
                 "file_path": att_data["url"],
                 "user": message.author.name,
                 "group_name": getattr(message.channel, "name", "DM"),
-                "department": "General",  # Default department for Discord uploads
-                "source": "discord",  # Mark as Discord source
-                "user_id": str(message.author.id),  # Discord user ID
-                "message_id": str(message.id),  # Discord message ID
-                "channel_id": str(message.channel.id),  # Discord channel ID
+                "department": "General",
+                "source": "discord",
+                "user_id": str(message.author.id),
+                "message_id": str(message.id),
+                "channel_id": str(message.channel.id),
             }
             try:
                 add_data_from_discord(file_record)
             except Exception as e:
                 print(f"Error saving file to database: {e}")
 
-    # async def send_to_backend(self, payload: dict):
-    #     if not API_BASE_URL:
-    #         print("API_BASE_URL not configured, skipping send.")
-    #         return
-
-    #     try:
-    #         async with aiohttp.ClientSession() as session:
-    #             async with session.post(API_BASE_URL, json=payload) as resp:
-    #                 if resp.status not in (200, 201):
-    #                     text = await resp.text()
-    #                     print(f"Backend error {resp.status}: {text}")
-    #                 else:
-    #                     print("Successfully sent payload to backend.")
-    #     except Exception as e:
-    #         print(f"Error sending data to backend: {e}")
-
     # ---------- event listener ----------
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        # Ignore DMs and bot messages
-        if message.guild is None:
-            return
-        if message.author.bot:
-            return
-
-        # Collector disabled
-        if not self.collect_active:
+        if message.guild is None or message.author.bot or not self.collect_active:
             return
 
         has_attachments = len(message.attachments) > 0
@@ -118,16 +92,10 @@ class CollectorCog(commands.Cog):
             return
 
         payload = self.build_payload_from_message(message)
-        print(
-            f"Collecting from {message.author} in #{message.channel}: "
-            f"{len(payload['attachments'])} attachments, {len(payload['links'])} links"
-        )
+        print(f"Collecting from {message.author} in #{message.channel}")
 
-        # Save files to database
         if has_attachments:
             self.save_files_to_database(message, payload['attachments'])
-
-        # await self.send_to_backend(payload)
 
     # ---------- slash commands ----------
 
@@ -160,23 +128,12 @@ class CollectorCog(commands.Cog):
             f"API endpoint: `{API_BASE_URL or 'NOT CONFIGURED'}`"
         )
 
-    # shared error handler for admin-only commands
-    @enable_collection.error
-    @disable_collection.error
-    async def admin_command_error(
-        self,
-        interaction: discord.Interaction,
-        error: app_commands.AppCommandError,
-    ):
+    # Error handler for admin checks
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CheckFailure):
-            await interaction.response.send_message(
-                "❌ You do not have permission to use this command.",
-                ephemeral=True,
-            )
+            await interaction.response.send_message("❌ Missing required admin role.", ephemeral=True)
         else:
-            await interaction.response.send_message(
-                f"❌ An error occurred: {error}", ephemeral=True
-            )
+            await interaction.response.send_message(f"❌ Error: {str(error)}", ephemeral=True)
 
 
 async def setup(bot: commands.Bot):

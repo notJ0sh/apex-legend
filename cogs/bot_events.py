@@ -1,3 +1,4 @@
+# bot_events.py
 """
 Discord bot events and event handlers.
 """
@@ -16,8 +17,10 @@ def setup_bot_events(bot: commands.Bot) -> None:
         """Event triggered when bot successfully logs in."""
         print(f"Logged in as {bot.user} (ID: {bot.user.id})")
         try:
+            # This syncs EVERYTHING: the commands below AND those in the CollectorCog
             synced = await bot.tree.sync()
-            print(f"Synced {len(synced)} application command(s).")
+            print(
+                f"Synced {len(synced)} application command(s) to Discord tree.")
         except Exception as e:
             print(f"Error syncing commands: {e}")
 
