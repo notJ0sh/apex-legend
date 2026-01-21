@@ -21,4 +21,4 @@ def register_routes(app):
     @app.route('/home')
     def home():
         # sends the user to the homepage
-        return render_template('homepage.html')
+        return render_template('dashboard.html')

@@ -109,4 +109,4 @@ def register_auth_routes(app):
             'SELECT id, username, user_role, department FROM users'
         ).fetchall()
 
-        return render_template('manage_users.html', users=users)
+        return render_template('users.html', users=users)
