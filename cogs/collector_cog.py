@@ -1,5 +1,6 @@
 # collector_cog.py
 from database_helpers import add_data_from_discord
+from admin_checks import has_admin_role, admin_only_check
 import os
 import re
 import aiohttp
@@ -11,32 +12,11 @@ from dotenv import load_dotenv
 from sys import path
 from pathlib import Path
 
-# Add parent directory to path so we can import database_helpers
-parent_dir = str(Path(__file__).parent.parent)
-if parent_dir not in path:
-    path.insert(0, parent_dir)
-
 
 load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL", "").strip()
 ADMIN_ROLE_NAME = os.getenv("ADMIN_ROLE_NAME", "Admin")
-
-
-def has_admin_role(member: discord.Member) -> bool:
-    for role in member.roles:
-        if role.name == ADMIN_ROLE_NAME:
-            return True
-    return False
-
-
-def admin_only_check(interaction: discord.Interaction) -> bool:
-    if not isinstance(interaction.user, discord.Member):
-        raise app_commands.CheckFailure("Not a guild member.")
-    if not has_admin_role(interaction.user):
-        raise app_commands.CheckFailure(
-            "You do not have the required admin role.")
-    return True
 
 
 class CollectorCog(commands.Cog):
