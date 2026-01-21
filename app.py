@@ -5,20 +5,22 @@ import asyncio
 import threading
 from dotenv import load_dotenv
 
-from flask import Flask, request
+from flask import Flask
 from flask_login import LoginManager
 from database_helpers import ensure_databases, close_databases, get_database, USER_DATABASE
 from models import User
 from app_routes import register_routes
 
 import logging
+from log_handler import setup_logging
 
 # Discord bot imports
 import discord
 from discord.ext import commands
-from discord import app_commands
-from cogs.admin_checks import has_admin_role, admin_only_check
 from cogs.bot_events import setup_bot_events
+
+# Init logging
+setup_logging()
 
 # Init login manager
 login_manager = LoginManager()
@@ -44,16 +46,6 @@ app = Flask(__name__, template_folder='templates (HTML pages)',
 # Get secret key
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "fd7gs6h9guohejtbgisfu")
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.FileHandler("Logs/app_activity.txt"),  # Writes to your file
-        logging.StreamHandler()                 # Also writes to your terminal
-    ]
-)
 
 # Link login manager to app
 login_manager.init_app(app)

@@ -6,6 +6,8 @@ from flask import g, Flask
 from models import File
 import requests
 
+from log_handler import log_db_entry
+
 #      -----      {{{     DATABASE CONSTANTS     }}}      -----      #
 
 USER_DATABASE = 'user_data.db'
@@ -96,6 +98,10 @@ def add_data(db_name: str, table: str, data: dict) -> None:
         # Only close if we created the connection outside Flask context
         if should_close:
             database.close()
+
+        # Log the information and success
+        log_db_entry(data=data)
+
 
 
 # Download file from URL to destination path.
