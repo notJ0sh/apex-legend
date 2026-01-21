@@ -1,19 +1,18 @@
 # collector_cog.py
-from database_helpers import add_data_from_discord
-from .admin_checks import admin_only_check
 import os
 import re
-import aiohttp
 import discord
-
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 
+# Import the check from your existing admin_checks file
+from .admin_checks import admin_only_check
+from database_helpers import add_data_from_discord
+
 load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL", "").strip()
-ADMIN_ROLE_NAME = os.getenv("ADMIN_ROLE_NAME", "Admin")
 
 
 class CollectorCog(commands.Cog):
@@ -32,20 +31,18 @@ class CollectorCog(commands.Cog):
         return pattern.findall(text or "")
 
     def build_payload_from_message(self, message: discord.Message) -> dict:
-        attachments_data: list[dict] = []
+        attachments_data = []
         for att in message.attachments:
-            attachments_data.append(
-                {
-                    "filename": att.filename,
-                    "url": att.url,
-                    "content_type": att.content_type,
-                    "size": att.size,
-                }
-            )
+            attachments_data.append({
+                "filename": att.filename,
+                "url": att.url,
+                "content_type": att.content_type,
+                "size": att.size,
+            })
 
         links = self.extract_links(message.content or "")
 
-        payload = {
+        return {
             "message_id": str(message.id),
             "uploader_id": str(message.author.id),
             "uploader_name": message.author.name,
@@ -56,7 +53,6 @@ class CollectorCog(commands.Cog):
             "links": links,
             "timestamp": message.created_at.isoformat(),
         }
-        return payload
 
     def save_files_to_database(self, message: discord.Message, attachments_data: list[dict]):
         """Save file data to the files table in the database."""
@@ -82,13 +78,14 @@ class CollectorCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        # Ignore DMs and bot messages
         if message.guild is None or message.author.bot or not self.collect_active:
             return
 
         has_attachments = len(message.attachments) > 0
         has_links = len(self.extract_links(message.content or "")) > 0
 
-        if not has_attachments and not has_links:
+        if not (has_attachments or has_links):
             return
 
         payload = self.build_payload_from_message(message)
@@ -101,7 +98,7 @@ class CollectorCog(commands.Cog):
 
     @app_commands.command(
         name="enable_collection",
-        description="Enable automatic file/link collection.",
+        description="Enable automatic file/link collection."
     )
     @app_commands.check(admin_only_check)
     async def enable_collection(self, interaction: discord.Interaction):
@@ -110,7 +107,7 @@ class CollectorCog(commands.Cog):
 
     @app_commands.command(
         name="disable_collection",
-        description="Disable automatic file/link collection.",
+        description="Disable automatic file/link collection."
     )
     @app_commands.check(admin_only_check)
     async def disable_collection(self, interaction: discord.Interaction):
@@ -119,21 +116,18 @@ class CollectorCog(commands.Cog):
 
     @app_commands.command(
         name="collector_status",
-        description="Show collector status and API endpoint.",
+        description="Show current collector status."
     )
     async def collector_status(self, interaction: discord.Interaction):
         status = "active ✅" if self.collect_active else "inactive ❌"
-        await interaction.response.send_message(
-            f"Collector is currently **{status}**.\n"
-            f"API endpoint: `{API_BASE_URL or 'NOT CONFIGURED'}`"
-        )
+        await interaction.response.send_message(f"Collector is currently **{status}**.")
 
-    # Error handler for admin checks
+    # Shared error handler for this Cog
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CheckFailure):
-            await interaction.response.send_message("❌ Missing required admin role.", ephemeral=True)
+            await interaction.response.send_message("❌ You do not have the required Admin role.", ephemeral=True)
         else:
-            await interaction.response.send_message(f"❌ Error: {str(error)}", ephemeral=True)
+            print(f"Cog Command Error: {error}")
 
 
 async def setup(bot: commands.Bot):

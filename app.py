@@ -69,9 +69,10 @@ intents.guilds = True
 intents.guild_messages = True
 intents.members = True
 
+# bot instance
 bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents)
 
-# Setup bot events and commands
+# Setup bot events and global commands
 setup_bot_events(bot)
 
 # How to load user
@@ -86,8 +87,6 @@ def load_user(user_id):
     ).fetchone()
 
     if user_data:
-        # These keyword names (id, username, user_role)
-        # MUST match the __init__ names in your User class
         return User(
             id=user_data[0],
             username=user_data[1],
@@ -101,19 +100,19 @@ def load_user(user_id):
 
 # Global event loop for the bot
 bot_loop = None
-bot_task = None
 
 
 async def run_bot():
     """Run the Discord bot."""
     async with bot:
-        # Load extensions
+        # Load Cog FIRST so the sync in bot_events picks it up
         try:
             await bot.load_extension("cogs.collector_cog")
             print("Loaded collector_cog.")
         except Exception as e:
             print(f"Failed to load collector_cog: {e}")
 
+        # This starts the connection; on_ready will handle the tree sync
         await bot.start(DISCORD_TOKEN)
 
 
@@ -134,26 +133,22 @@ def start_bot_thread():
 
     bot_thread = threading.Thread(target=run_async_loop, daemon=True)
     bot_thread.start()
-    print("Discord bot started in background thread.")
+    print("Discord bot thread initialized.")
 
 
 #      -----      {{{     SAFETY EVENT HANDLERS     }}}      -----      #
 
-
-# Ensures databases are initialized before first request
 @app.before_request
 def before_request() -> None:
     ensure_databases(app)
 
 
-# Ensures databases are closed after request
 @app.teardown_appcontext
 def teardown_appcontext(error) -> None:
     close_databases(error)
 
 
 #      -----      {{{     RUN APP     }}}      -----      #
-
 
 if __name__ == '__main__':
     # Initialize databases BEFORE starting bot
@@ -164,7 +159,8 @@ if __name__ == '__main__':
     start_bot_thread()
 
     # Initial log entry
-    logging.info("Starting Flask Web Server...")  # Added log entry
+    logging.info("Starting Flask Web Server...")
 
     # Start Flask web server on main thread
-    app.run(debug=True, use_reloader=False)  # IMPORTANT: use_reloader=False
+    # use_reloader=False is critical to prevent the bot thread from starting twice
+    app.run(debug=True, use_reloader=False)
