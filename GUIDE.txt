@@ -1,3 +1,14 @@
+FOR BOTH:
+
+- run the code from app.py AND CLICK THE CORRECT LOCAL HOST LINK
+- Everytime u run the code it will create __pycache__ and database (.db) files
+    |_ delete these before u run ur code (app.py)
+    |_ or u could run the cleanup.py file that I created to do that for u
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+
 FOR MAITRI:
 
 to use:
@@ -19,12 +30,7 @@ to use:
 5. Add logs stuff if u got time
 
 
-
-
-
-
-
-
+---------------------------------------------------------------------------------------------------------------------------------
 
 
 FOR REANNE:
