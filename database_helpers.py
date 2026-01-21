@@ -3,6 +3,7 @@
 import sqlite3
 import os
 from flask import g, Flask
+from models import File
 import requests
 
 #      -----      {{{     DATABASE CONSTANTS     }}}      -----      #
@@ -179,3 +180,14 @@ def get_user_by_id(user_id: int) -> dict | None:
         # Only close if we created the connection outside Flask context
         if should_close:
             database.close()
+
+
+# Retrieve files by department
+def get_files_by_department(department_name: str) -> list[File]:
+    db = get_database(FILES_DATABASE)
+    cursor = db.execute(
+        'SELECT * FROM files WHERE department = ? ORDER BY time_stamp DESC',
+        (department_name,)
+    ).fetchall()
+
+    return [File.from_row(row) for row in cursor]
