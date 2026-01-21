@@ -1,5 +1,5 @@
 # collector_cog.py
-from database_helpers import add_file_data
+from database_helpers import add_data_from_discord
 import os
 import re
 import aiohttp
@@ -97,9 +97,7 @@ class CollectorCog(commands.Cog):
                 "channel_id": str(message.channel.id),  # Discord channel ID
             }
             try:
-                add_file_data(file_record)
-                print(
-                    f"Saved file '{att_data['filename']}' to database from Discord.")
+                add_data_from_discord(file_record)
             except Exception as e:
                 print(f"Error saving file to database: {e}")
 

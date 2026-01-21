@@ -42,7 +42,6 @@ to use:
 - homepage.html
 - edit-file.html
 - delete-file.html
-- add-file.html
 
 1. Add file viewing into homepage.html
     |_ make it so that it checks user department (current_user.role -> or u can just read models.py n look at the class there)
@@ -51,7 +50,7 @@ to use:
     |_ Use Jinja to make it so that only admins can use the department filter but normal users cannot. (normal users can only use normal filters like file stuff idk up to u)
     |_ edit the app_routes.py to work with ur logic (ill do a bit as like a template)
 
-2. Add html and shi to the add-file / delete-file / edit-file stuff
+2. Add html and shi to the delete-file / edit-file stuff
     |_ check models.py for the classes and file object stuff as reference
     |_ much easier to create an object for the file then put data there instead of a long ass dictionary or list
 

@@ -61,6 +61,9 @@ Thumbs.db
 # Logs (everything inside the Logs folder)
 Logs/*
 
+# Downloads folder
+downloads/*
+
 # Temporary files
 __pycache__/
 *.pyc
