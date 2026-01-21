@@ -60,9 +60,11 @@ Thumbs.db
 
 # Logs (everything inside the Logs folder)
 Logs/*
+!Logs/.gitkeep
 
 # Downloads folder
 downloads/*
+!downloads/.gitkeep
 
 # Temporary files
 __pycache__/
