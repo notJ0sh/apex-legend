@@ -25,11 +25,13 @@ class CollectorCog(commands.Cog):
 
     # ---------- helpers ----------
 
+    # extract links from text
     @staticmethod
     def extract_links(text: str) -> list[str]:
         pattern = re.compile(r"(https?://[^\s]+)", re.IGNORECASE)
         return pattern.findall(text or "")
 
+    # build payload from message into dict
     def build_payload_from_message(self, message: discord.Message) -> dict:
         attachments_data = []
         for att in message.attachments:
@@ -54,6 +56,7 @@ class CollectorCog(commands.Cog):
             "timestamp": message.created_at.isoformat(),
         }
 
+    # save file data to database
     def save_files_to_database(self, message: discord.Message, attachments_data: list[dict]):
         """Save file data to the files table in the database."""
         for att_data in attachments_data:
@@ -63,7 +66,7 @@ class CollectorCog(commands.Cog):
                 "file_path": att_data["url"],
                 "user": message.author.name,
                 "group_name": getattr(message.channel, "name", "DM"),
-                "department": "General",
+                "department": getattr(message.channel, "name", "N/A"),
                 "source": "discord",
                 "user_id": str(message.author.id),
                 "message_id": str(message.id),
