@@ -22,3 +22,8 @@ def register_routes(app):
     def home():
         # sends the user to the homepage
         return render_template('dashboard.html')
+    
+    #Settings page
+    @app.route('/settings')
+    def settings():
+        return render_template('settings.html')
