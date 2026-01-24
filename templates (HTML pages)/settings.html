@@ -9,13 +9,13 @@
         <div class="sidebar-header">
             <h2>Settings</h2>
         </div>
-        
+
         <ul class="sidebar-menu">
             <li class="menu-item active" data-section="account">
                 <span>👤</span> My Account
             </li>
         </ul>
-        
+
         <div class="sidebar-footer">
             <div class="user-info">
                 <div class="user-avatar">{{ current_user.username|first|upper }}</div>
@@ -26,22 +26,22 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Main Content -->
     <div class="settings-main">
         <div class="settings-tabs">
             <button class="tab-btn active" data-tab="personal-info">My Personal Information</button>
             <button class="tab-btn" data-tab="feedback">Feedback</button>
         </div>
-        
+
         <div class="settings-content">
-            <!-- Personal Information -->
+            <!-- Personal Info -->
             <div id="personal-info" class="content-tab active">
                 <div class="content-header">
                     <h1>My Personal Information</h1>
                     <p>View and manage your account information</p>
                 </div>
-                
+
                 <div class="info-card">
                     <h3>Account Information</h3>
                     <div class="info-grid">
@@ -55,43 +55,73 @@
                         </div>
                         <div class="info-item">
                             <label>Role</label>
-                            <div class="info-value role-badge">{{ current_user.user_role|title }}</div>
+                            <div class="info-value role-badge">
+                                {% if current_user.role %}
+                                {{ current_user.role|title }}
+                                {% elif current_user.user_role %}
+                                {{ current_user.user_role|title }}
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="info-item">
                             <label>Department</label>
                             <div class="info-value">
                                 {% if current_user.department %}
-                                    {{ current_user.department }}
+                                {{ current_user.department }}
                                 {% else %}
-                                    Not specified
+                                Not specified
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <div class="info-value">
+                                {% if user_email %}
+                                {{ user_email }}
+                                {% else %}
+                                Not set
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone</label>
+                            <div class="info-value">
+                                {% if user_phone %}
+                                {{ user_phone }}
+                                {% else %}
+                                Not set
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="info-card">
                     <h3>Contact Information</h3>
-                    <form id="contactForm">
+                    <form id="contactForm" action="{{ url_for('update_profile') }}" method="POST">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" placeholder="Enter your email address">
-                                <p class="form-help">We'll use this email to contact you about your account</p>
+                                <input type="email" id="email" name="email"
+                                    value="{% if user_email %}{{ user_email }}{% endif %}"
+                                    placeholder="Enter your email address" required>
+                                <p class="form-help">We'll use this email to contact you about your account.</p>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="full_name">Full Name</label>
-                                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name">
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                                <label for="phone_number">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number"
+                                    value="{% if user_phone %}{{ user_phone }}{% endif %}"
+                                    placeholder="Enter 8-digit phone number" pattern="\d{8}"
+                                    title="Phone number must be exactly 8 digits (no spaces or +65)" maxlength="8"
+                                    oninput="this.value = this.value.replace(/\D/g, '')" required>
+                                <p class="form-help">Enter exactly 8 digits (no spaces or symbols, e.g., 12345678).
+                                </p>
                             </div>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button type="button" class="btn-secondary" onclick="resetContactForm()">
                                 Reset
@@ -102,30 +132,15 @@
                         </div>
                     </form>
                 </div>
-                
-                <div class="info-card">
-                    <h3>Account Security</h3>
-                    <div class="security-options">
-                        <div class="security-item">
-                            <div class="security-info">
-                                <h4>Change Password</h4>
-                                <p>Update your password to keep your account secure</p>
-                            </div>
-                            <button class="btn-outline" onclick="changePassword()">
-                                Change Password
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
-            
+
             <!-- Feedback -->
             <div id="feedback" class="content-tab">
                 <div class="content-header">
                     <h1>Feedback</h1>
                     <p>Help us improve by sharing your thoughts</p>
                 </div>
-                
+
                 <div class="info-card">
                     <h3>Send Feedback</h3>
                     <form id="feedbackForm">
@@ -141,24 +156,24 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="subject">Subject</label>
-                                <input type="text" id="subject" name="subject" 
-                                       placeholder="Brief description of your feedback" required>
+                                <input type="text" id="subject" name="subject"
+                                    placeholder="Brief description of your feedback" required>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="message">Message</label>
-                                <textarea id="message" name="message" 
-                                          placeholder="Please provide details about your feedback..." 
-                                          rows="6" required></textarea>
+                                <textarea id="message" name="message"
+                                    placeholder="Please provide details about your feedback..." rows="6"
+                                    required></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group checkbox-group">
                                 <label class="checkbox-label">
@@ -169,7 +184,7 @@
                                 <p class="form-help">We may contact you for more details about your feedback</p>
                             </div>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button type="button" class="btn-secondary" onclick="resetFeedback()">
                                 Clear Form
@@ -180,7 +195,7 @@
                         </div>
                     </form>
                 </div>
-                
+
                 <div class="info-card">
                     <h3>Feedback Status</h3>
                     <div class="status-info">
@@ -192,4 +207,55 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Tab switching for settings page
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        if (tabButtons.length > 0) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+
+                    // Hide all content tabs
+                    const contentTabs = document.querySelectorAll('.content-tab');
+                    contentTabs.forEach(tab => tab.classList.remove('active'));
+
+                    // Show selected content tab
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Feedback form submission
+            const feedbackForm = document.getElementById('feedbackForm');
+            if (feedbackForm) {
+                feedbackForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    alert('Thank you for your feedback!');
+                    this.reset();
+                });
+            }
+        }
+    });
+
+    // Reset Contact Form to current values
+    function resetContactForm() {
+        if (confirm('Reset contact information to current values?')) {
+            document.getElementById('email').value = "{% if user_email %}{{ user_email }}{% endif %}";
+            document.getElementById('phone_number').value = "{% if user_phone %}{{ user_phone }}{% endif %}";
+        }
+    }
+
+    // Reset Feedback Form
+    function resetFeedback() {
+        if (confirm('Clear all feedback fields?')) {
+            const form = document.getElementById('feedbackForm');
+            if (form) form.reset();
+        }
+    }
+</script>
 {% endblock %}

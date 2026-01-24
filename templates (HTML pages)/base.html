@@ -32,68 +32,6 @@
     <main class="container">
         {% block content %}{% endblock %}
     </main>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Tab switching for settings page
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            if (tabButtons.length > 0) {
-                tabButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        // Remove active class from all tabs
-                        tabButtons.forEach(btn => btn.classList.remove('active'));
-                        // Add active class to clicked tab
-                        this.classList.add('active');
-
-                        // Hide all content tabs
-                        const contentTabs = document.querySelectorAll('.content-tab');
-                        contentTabs.forEach(tab => tab.classList.remove('active'));
-
-                        // Show selected content tab
-                        const tabId = this.getAttribute('data-tab');
-                        document.getElementById(tabId).classList.add('active');
-                    });
-                });
-
-                // Form submissions
-                const contactForm = document.getElementById('contactForm');
-                if (contactForm) {
-                    contactForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        alert('Contact information saved successfully!');
-                    });
-                }
-
-                const feedbackForm = document.getElementById('feedbackForm');
-                if (feedbackForm) {
-                    feedbackForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        alert('Thank you for your feedback!');
-                        this.reset();
-                    });
-                }
-            }
-        });
-
-        // Form reset functions
-        function resetContactForm() {
-            if (confirm('Reset all contact information fields?')) {
-                const form = document.getElementById('contactForm');
-                if (form) form.reset();
-            }
-        }
-
-        function resetFeedback() {
-            if (confirm('Clear all feedback fields?')) {
-                const form = document.getElementById('feedbackForm');
-                if (form) form.reset();
-            }
-        }
-
-        function changePassword() {
-            alert('Password change functionality would be implemented here.');
-        }
-    </script>
 </body>
 
 </html>

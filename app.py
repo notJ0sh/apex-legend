@@ -74,7 +74,7 @@ setup_bot_events(bot)
 def load_user(user_id):
     db = get_database(USER_DATABASE)
     user_data = db.execute(
-        'SELECT id, username, user_role, department FROM users WHERE id = ?',
+        'SELECT id, username, user_role, department, email, phone_number FROM users WHERE id = ?',
         (user_id,)
     ).fetchone()
 
