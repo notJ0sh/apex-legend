@@ -14,6 +14,11 @@ USER_DATABASE = 'user_data.db'
 FILES_DATABASE = 'files_data.db'
 
 
+#      -----      {{{     DIRECTORY CONSTANTS     }}}      -----      #
+
+UPLOAD_DIRECTORY = 'downloads'
+
+
 #      -----      {{{     DATABASE HELPERS     }}}      -----      #
 
 
@@ -197,14 +202,18 @@ def get_files_by_department(department_name: str) -> list[File]:
 
     return [File.from_row(row) for row in cursor]
 
+
+# Check file exists by file name
+def check_file_exists(filename: str) -> bool:
+    return os.path.exists(os.path.join(UPLOAD_DIRECTORY, filename))
+
+
 # Retrieve download file by file name and returns success status
 
 
 def get_file_download(filename: str) -> Response:
-    UPLOAD_DIRECTORY = 'downloads'
-
     # Check if file exists
-    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, filename)):
+    if not check_file_exists(filename=filename):
         return Response("File not found.", status=404)
 
     return send_from_directory(
@@ -227,7 +236,7 @@ def download_route(filename):
     return response
     
 
-HTML:
+HTML: (basically its a href thingy)
 <h3>Available Files</h3>
 <ul>
     {% for file in files %}
