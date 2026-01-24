@@ -180,7 +180,7 @@
     border-radius: 8px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .info-card h3 {
@@ -308,12 +308,12 @@
     transition: all 0.2s;
 }
 
-.checkbox-label input:checked ~ .checkmark {
+.checkbox-label input:checked~.checkmark {
     background-color: #5865f2;
     border-color: #5865f2;
 }
 
-.checkbox-label input:checked ~ .checkmark::after {
+.checkbox-label input:checked~.checkmark::after {
     content: '';
     position: absolute;
     left: 5px;
@@ -424,8 +424,13 @@
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Responsive Design */
@@ -433,29 +438,164 @@
     .settings-container {
         flex-direction: column;
     }
-    
+
     .settings-sidebar {
         width: 100%;
         height: auto;
     }
-    
+
     .settings-tabs {
         overflow-x: auto;
         white-space: nowrap;
     }
-    
+
     .form-row {
         flex-direction: column;
         gap: 16px;
     }
-    
+
     .security-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
     }
-    
+
     .security-item button {
         align-self: flex-end;
     }
+}
+.files-container {
+    padding: 20px;
+}
+
+.filter-section {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-section label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.filter-section select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.reset-btn {
+    padding: 8px 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.reset-btn:hover {
+    background: #5a6268;
+}
+
+.files-table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.files-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.files-table th {
+    background: #007bff;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.files-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.files-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.file-icon {
+    margin-right: 8px;
+}
+
+.department-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e9ecef;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.source-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.discord-badge {
+    background: #7289da;
+    color: white;
+}
+
+.web-badge {
+    background: #28a745;
+    color: white;
+}
+
+.download-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.download-btn:hover {
+    background: #218838;
+    color: white;
+    text-decoration: none;
+}
+
+.no-files {
+    text-align: center;
+    padding: 40px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.files-stats {
+    margin-top: 20px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
 }

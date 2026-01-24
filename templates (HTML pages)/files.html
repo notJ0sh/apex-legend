@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Files - Apex Legend App{% endblock %}
+
+{% block content %}
+<div class="files-container">
+    <h2>File Repository</h2>
+
+    <!-- Department Filter -->
+    <div class="filter-section">
+        <label for="department-filter">Filter by Department:</label>
+        <select id="department-filter" onchange="filterFiles()">
+            <option value="all">All Departments</option>
+            {% for dept in departments %}
+            <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>
+                {{ dept }}
+            </option>
+            {% endfor %}
+        </select>
+        <button onclick="resetFilter()" class="reset-btn">Reset Filter</button>
+    </div>
+
+    <!-- Files Table -->
+    <div class="files-table-container">
+        {% if files %}
+        <table class="files-table">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>File Type</th>
+                    <th>Date Uploaded/Edited</th>
+                    <th>Department (Tag)</th>
+                    <th>Uploaded By</th>
+                    <th>Project</th>
+                    <th>Source</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr data-department="{{ file.department }}">
+                    <!-- File Name with icon -->
+                    <td>
+                        <span class="file-icon">{{ get_file_icon(file.file_type) }}</span>
+                        {{ file.file_name }}
+                    </td>
+                    <!-- File Type -->
+                    <td>{{ file.file_type|upper }}</td>
+                    <!-- Date -->
+                    <td>
+                        {% if file.time_stamp %}
+                        {{ file.time_stamp[:19] }} <!-- Show first 19 characters (YYYY-MM-DD HH:MM:SS) -->
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <!-- Department -->
+                    <td>
+                        <span class="department-tag">{{ file.department }}</span>
+                    <!-- Uploaded By -->
+                    <td>{{ file.user or 'N/A' }}</td>
+                    <!-- Project -->
+                    <td>{{ file.project or 'N/A' }}</td>
+                    <!-- Source -->
+                    <td>
+                        <span
+                            class="source-badge {% if file.source == 'discord' %}discord-badge{% else %}web-badge{% endif %}">
+                            {{ file.source|title }}
+                        </span>
+                    </td>
+                    <!-- Actions -->
+                    <td>
+                        <a href="{{ url_for('download_file', filename=file.file_name) }}" class="download-btn"
+                            title="Download {{ file.file_name }}">
+                            📥 Download
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-files">
+            <p>No files found{% if selected_dept and selected_dept != 'all' %} for department: {{ selected_dept }}{%
+                endif %}.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Statistics -->
+    <div class="files-stats">
+        <p>Showing <strong>{{ files|length }}</strong> file(s)
+            {% if selected_dept and selected_dept != 'all' %}
+            in <strong>{{ selected_dept }}</strong> department
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<script>
+    function filterFiles() {
+        const select = document.getElementById('department-filter');
+        const selectedDept = select.value;
+
+        // Redirect to filtered view
+        if (selectedDept === 'all') {
+            window.location.href = "{{ url_for('files') }}";
+        } else {
+            window.location.href = "{{ url_for('files') }}?department=" + encodeURIComponent(selectedDept);
+        }
+    }
+
+    function resetFilter() {
+        window.location.href = "{{ url_for('files') }}";
+    }
+</script>
+{% endblock %}

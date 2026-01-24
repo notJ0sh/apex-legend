@@ -3,10 +3,27 @@
 from flask import render_template, redirect, url_for, request
 from flask_login import current_user
 from auth_user_routes import register_auth_routes
-from database_helpers import get_database, USER_DATABASE
+from database_helpers import get_database, USER_DATABASE, get_files_by_department, FILES_DATABASE
+from models import File
 
 #      -----      {{{     ROUTES (MAIN EVENTS)     }}}      -----      #
-
+def get_file_icon(file_type):
+    icon_map = {
+        'pdf': '📄',
+        'doc': '📝',
+        'docx': '📝',
+        'ppt': '📊',
+        'pptx': '📊',
+        'xls': '📈',
+        'xlsx': '📈',
+        'jpg': '🖼️',
+        'jpeg': '🖼️',
+        'png': '🖼️',
+        'zip': '📦',
+        'txt': '📃',
+        'csv': '📋'
+    }
+    return icon_map.get(file_type.lower(), '📎')
 
 def register_routes(app):
     """Register all routes with the Flask app."""
@@ -71,3 +88,57 @@ def register_routes(app):
         except Exception as e:
             print(f"Error updating profile: {e}")
             return "Failed to update profile", 500
+        
+    # Files repository page
+    @app.route('/files')
+    def files():
+        # Get all unique departments for filter dropdown
+        db = get_database(FILES_DATABASE)
+        departments = db.execute(
+            'SELECT DISTINCT department FROM files ORDER BY department'
+        ).fetchall()
+        departments = [dept[0] for dept in departments if dept[0]]
+        
+        # Get selected department from query parameter
+        selected_dept = request.args.get('department', 'all')
+        
+        # Get files based on filter
+        if selected_dept and selected_dept != 'all':
+            files_list = get_files_by_department(selected_dept)
+        else:
+            # Get all files
+            cursor = db.execute(
+                'SELECT * FROM files ORDER BY time_stamp DESC'
+            ).fetchall()
+            files_list = [File.from_row(row) for row in cursor]
+        
+        return render_template('files.html', 
+                            files=files_list,
+                            departments=departments,
+                            selected_dept=selected_dept,
+                            get_file_icon=get_file_icon)
+
+    # Download route (add this too)
+    @app.route('/download/<filename>')
+    def download_file(filename):
+        from database_helpers import get_file_download
+        return get_file_download(filename)
+    
+    # Add this route temporarily to debug
+    @app.route('/debug-files')
+    def debug_files():
+        """Debug route to check files in database."""
+        db = get_database(FILES_DATABASE)
+        
+        # Check total count
+        count = db.execute('SELECT COUNT(*) FROM files').fetchone()[0]
+        
+        # Get all files
+        files = db.execute('SELECT * FROM files').fetchall()
+        
+        result = f"Total files in database: {count}<br><br>"
+        result += "Files:<br>"
+        for file in files:
+            result += f"ID: {file['id']}, Name: {file['file_name']}, Dept: {file['department']}<br>"
+        
+        return result
