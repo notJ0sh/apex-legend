@@ -3,11 +3,10 @@
 {% block title %}Home - Apex Legend{% endblock %}
 
 {% block content %}
-<div class="homepage">
-    <h1>Welcome to Apex Legend App</h1>
-    <p>This is the homepage of our application.</p>
-    <div class="quick-links">
-        <p><a href="{{ url_for('login') }}">Login</a></p>
-    </div>
+<div class="container d-flex flex-column justify-content-center align-items-center text-white text-center" style="height: 80vh;">
+    
+    <h1 class="display-3 fw-bold mb-3">Welcome to Apex Legend App</h1>
+    <p class="lead mb-4">This is the homepage of our application.</p>
+
 </div>
 {% endblock %}

@@ -1,43 +1,51 @@
 {% extends "base.html" %}
-
-{% block title %}Manage Users - Apex Legend{% endblock %}
-
 {% block content %}
-<div class="admin-container">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Manage Users</h1>
-        <a href="{{ url_for('register') }}" class="btn-primary"
-            style="text-decoration: none; background: #28a745; color: white; padding: 10px; border-radius: 5px;">+
-            Create New User</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 text-white">
+        <h2>Manage Users</h2>
+        <a href="{{ url_for('register') }}" class="btn btn-success">
+            <i class="bi bi-person-plus-fill"></i> Add New User
+        </a>
     </div>
-
-    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        <thead>
-            <tr style="background-color: #f4f4f4;">
-                <th>ID</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Department</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td style="padding: 10px; text-align: center;">{{ user[0] }}</td>
-                <td style="padding: 10px;">{{ user[1] }}</td>
-                <td style="padding: 10px; text-align: center;">
-                    <span class="badge">{{ user[2] }}</span>
-                </td>
-                <td style="padding: 10px;">{{ user[3] or 'N/A' }}</td>
-                <td style="padding: 10px; text-align: center;">
-                    <a href="/edit-user/{{ user[0] }}">Edit</a> |
-                    <a href="/delete-user/{{ user[0] }}" style="color: red;"
-                        onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">#{{ user['id'] }}</td>
+                        <td class="fw-bold">{{ user['username'] }}</td>
+                        <td>
+                            {% if user['user_role'] == 'admin' %}
+                                <span class="badge bg-primary">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user['department'] or 'None' }}</td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('edit_user', user_id=user['id']) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <a href="{{ url_for('delete_user', user_id=user['id']) }}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="bi bi-trash-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}
