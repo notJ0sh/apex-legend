@@ -1,0 +1,22 @@
+<!-- NAVBAR LOGIC HERE -->
+<!-- ALL JAVASCRIPT DONE HERE WILL APPLY TO ALL PAGES -->
+<!-- THIS IS THE BASE TEMPLATE FOR ALL PAGES -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Apex Legend App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_reanne_hell.css') }}">
+</head>
+
+<body>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

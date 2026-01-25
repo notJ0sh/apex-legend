@@ -160,9 +160,3 @@ def register_auth_routes(app):
 
         user_row = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         return render_template('delete-user.html', user=user_row)
-
-    # --- 8. SETTINGS ---
-    @app.route('/settings')
-    @login_required
-    def settings():
-        return render_template('settings.html')

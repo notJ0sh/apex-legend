@@ -1,0 +1,212 @@
+{% extends "reanne_base.html" %}
+
+{% block title %}Files - Apex Legend App{% endblock %}
+
+{% block content %}
+<div class="files-container" style="min-height: 100vh;background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%)">
+    <h2 style="color: white;">File Repository</h2>
+
+    <!-- Search and Filter Section - LEFT ALIGNED -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <form method="GET" action="{{ url_for('files') }}" class="search-form">
+                    <input type="text" name="search" placeholder="Search by file name..." value="{{ search_query }}"
+                        class="search-input">
+                    <button type="submit" class="search-btn">🔍 Search</button>
+                    {% if search_query %}
+                    <a href="{{ url_for('files') }}{% if selected_dept and selected_dept != 'all' %}?department={{ selected_dept }}{% endif %}"
+                        class="clear-search">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Department Filter -->
+            <div class="department-filter-container">
+                <label for="department-filter">Filter by Department:</label>
+                <select id="department-filter" onchange="filterFiles()">
+                    <option value="all">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>
+                        {{ dept }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button onclick="resetFilter()" class="reset-btn">Reset Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Files Cards Display -->
+    <div class="files-cards-container">
+        {% if files %}
+        <div class="cards-grid">
+            {% for file in files %}
+            <div class="file-card" data-department="{{ file.department }}">
+                <!-- Card Header with File Name and Icon -->
+                <div class="card-header">
+                    <div class="file-icon-large">{{ get_file_icon(file.file_type) }}</div>
+                    <div class="file-name-container">
+                        <h3 class="file-name" title="{{ file.file_name }}">{{ file.file_name|truncate(30) }}</h3>
+                        <div class="file-meta">
+                            <span class="file-type">{{ file.file_type|upper }}</span>
+                            <span class="file-date">
+                                {% if file.time_stamp %}
+                                {{ format_datetime(file.time_stamp) }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body with Details -->
+                <div class="card-body">
+                    <div class="file-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Department:</span>
+                            <span class="department-badge department-{{ file.department|lower|replace(' ', '-') }}">
+                                {{ file.department }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Uploaded By:</span>
+                            <span class="detail-value">{{ file.user or 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Project:</span>
+                            <span class="detail-value">{{ file.project or 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Source:</span>
+                            <span
+                                class="source-badge {% if file.source == 'discord' %}discord-badge{% else %}web-badge{% endif %}">
+                                {{ file.source|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer with Actions -->
+                <div class="card-footer">
+                    <div class="card-actions">
+                        <a href="{{ url_for('download_file', filename=file.file_name) }}" class="download-btn"
+                            title="Download {{ file.file_name }}">
+                            📥 Download
+                        </a>
+                        <!-- Only show Edit and Delete buttons for admin users -->
+                        {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('edit_file', file_id=file.id) }}" class="edit-btn"
+                            title="Edit {{ file.file_name }}">
+                            ✏️ Edit
+                        </a>
+                        <a href="{{ url_for('delete_file', file_id=file.id) }}" class="delete-btn"
+                            title="Delete {{ file.file_name }}"
+                            onclick="return confirmDelete('{{ file.file_name }}', event)">
+                            🗑️ Delete
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-files">
+            <p>
+                {% if search_query %}
+                No files found for "{{ search_query }}"
+                {% if selected_dept and selected_dept != 'all' %}
+                in department: {{ selected_dept }}
+                {% endif %}
+                {% else %}
+                No files found
+                {% if selected_dept and selected_dept != 'all' %}
+                for department: {{ selected_dept }}
+                {% endif %}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Statistics -->
+    <div class="files-stats">
+        <p>
+            Showing <strong>{{ files|length }}</strong> file(s)
+            {% if search_query %}
+            matching "<strong>{{ search_query }}</strong>"
+            {% endif %}
+            {% if selected_dept and selected_dept != 'all' %}
+            in <strong>{{ selected_dept }}</strong> department
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<script>
+    function filterFiles() {
+        const select = document.getElementById('department-filter');
+        const selectedDept = select.value;
+        const searchQuery = "{{ search_query }}";
+
+        let url = "{{ url_for('files') }}";
+        let params = [];
+
+        if (selectedDept !== 'all') {
+            params.push(`department=${encodeURIComponent(selectedDept)}`);
+        }
+
+        if (searchQuery) {
+            params.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+
+        window.location.href = url;
+    }
+
+    function resetFilter() {
+        const searchQuery = "{{ search_query }}";
+        let url = "{{ url_for('files') }}";
+
+        if (searchQuery) {
+            url += '?search=' + encodeURIComponent(searchQuery);
+        }
+
+        window.location.href = url;
+    }
+
+    function confirmDelete(fileName, event) {
+        event.preventDefault();
+        const href = event.target.href;
+
+        if (confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone!`)) {
+            // Send POST request to delete
+            fetch(href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete file');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete file');
+                });
+        }
+        return false;
+    }
+</script>
+{% endblock %}
