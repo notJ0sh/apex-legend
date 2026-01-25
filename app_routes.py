@@ -10,6 +10,7 @@ from models import File
 def get_file_icon(file_type):
     icon_map = {
         'pdf': '📄',
+        'word': '📄',
         'doc': '📝',
         'docx': '📝',
         'ppt': '📊',
@@ -24,6 +25,20 @@ def get_file_icon(file_type):
         'csv': '📋'
     }
     return icon_map.get(file_type.lower(), '📎')
+
+def format_datetime(datetime_str):
+    """Format datetime string to DD-MM-YYYY HH:MM:SS (24h format)"""
+    if not datetime_str:
+        return 'N/A'
+    
+    try:
+        # Parse the datetime string
+        from datetime import datetime
+        dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+        # Format to DD-MM-YYYY HH:MM:SS
+        return dt.strftime('%d-%m-%Y %H:%M:%S')
+    except (ValueError, AttributeError):
+        return str(datetime_str)[:19]  # Fallback to original format
 
 def register_routes(app):
     """Register all routes with the Flask app."""
@@ -101,22 +116,37 @@ def register_routes(app):
         
         # Get selected department from query parameter
         selected_dept = request.args.get('department', 'all')
-        
-        # Get files based on filter
+        search_query = request.args.get('search', '').strip()
+
+        #Build queries based on filters
+        query = 'SELECT * FROM files'
+        conditions = []
+        params = []
+
         if selected_dept and selected_dept != 'all':
-            files_list = get_files_by_department(selected_dept)
-        else:
-            # Get all files
-            cursor = db.execute(
-                'SELECT * FROM files ORDER BY time_stamp DESC'
-            ).fetchall()
-            files_list = [File.from_row(row) for row in cursor]
+            conditions.append('department = ?')
+            params.append(selected_dept)
+
+        if search_query:
+            conditions.append('file_name LIKE ?')
+            params.append(f'%{search_query}%')
         
-        return render_template('files.html', 
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
+        
+        query += ' ORDER BY time_stamp DESC'
+
+        #Execute query
+        cursor = db.execute(query, tuple(params)).fetchall()
+        files_list = [File.from_row(row) for row in cursor]
+    
+        return render_template('files.html',
                             files=files_list,
                             departments=departments,
                             selected_dept=selected_dept,
-                            get_file_icon=get_file_icon)
+                            search_query=search_query,
+                            get_file_icon=get_file_icon,
+                            format_datetime=format_datetime)
 
     # Download route (add this too)
     @app.route('/download/<filename>')
@@ -124,21 +154,14 @@ def register_routes(app):
         from database_helpers import get_file_download
         return get_file_download(filename)
     
-    # Add this route temporarily to debug
-    @app.route('/debug-files')
-    def debug_files():
-        """Debug route to check files in database."""
-        db = get_database(FILES_DATABASE)
-        
-        # Check total count
-        count = db.execute('SELECT COUNT(*) FROM files').fetchone()[0]
-        
-        # Get all files
-        files = db.execute('SELECT * FROM files').fetchall()
-        
-        result = f"Total files in database: {count}<br><br>"
-        result += "Files:<br>"
-        for file in files:
-            result += f"ID: {file['id']}, Name: {file['file_name']}, Dept: {file['department']}<br>"
-        
-        return result
+    # Edit file route
+    @app.route('/edit-file/<int:file_id>')
+    def edit_file(file_id):
+        # We'll implement this later - for now just show a placeholder
+        return f"Edit file page for file ID: {file_id} - To be implemented"
+
+    # Delete file route
+    @app.route('/delete-file/<int:file_id>', methods=['POST'])
+    def delete_file(file_id):
+        # We'll implement this later - for now just show a placeholder
+        return f"Delete file for file ID: {file_id} - To be implemented"

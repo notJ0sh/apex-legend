@@ -6,90 +6,135 @@
 <div class="files-container">
     <h2>File Repository</h2>
 
-    <!-- Department Filter -->
+    <!-- Search and Filter Section - LEFT ALIGNED -->
     <div class="filter-section">
-        <label for="department-filter">Filter by Department:</label>
-        <select id="department-filter" onchange="filterFiles()">
-            <option value="all">All Departments</option>
-            {% for dept in departments %}
-            <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>
-                {{ dept }}
-            </option>
-            {% endfor %}
-        </select>
-        <button onclick="resetFilter()" class="reset-btn">Reset Filter</button>
+        <div class="filter-row">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <form method="GET" action="{{ url_for('files') }}" class="search-form">
+                    <input type="text" name="search" placeholder="Search by file name..." value="{{ search_query }}"
+                        class="search-input">
+                    <button type="submit" class="search-btn">🔍 Search</button>
+                    {% if search_query %}
+                    <a href="{{ url_for('files') }}{% if selected_dept and selected_dept != 'all' %}?department={{ selected_dept }}{% endif %}"
+                        class="clear-search">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Department Filter -->
+            <div class="department-filter-container">
+                <label for="department-filter">Filter by Department:</label>
+                <select id="department-filter" onchange="filterFiles()">
+                    <option value="all">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>
+                        {{ dept }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button onclick="resetFilter()" class="reset-btn">Reset Filter</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Files Table -->
-    <div class="files-table-container">
+    <!-- Files Cards Display -->
+    <div class="files-cards-container">
         {% if files %}
-        <table class="files-table">
-            <thead>
-                <tr>
-                    <th>File Name</th>
-                    <th>File Type</th>
-                    <th>Date Uploaded/Edited</th>
-                    <th>Department (Tag)</th>
-                    <th>Uploaded By</th>
-                    <th>Project</th>
-                    <th>Source</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for file in files %}
-                <tr data-department="{{ file.department }}">
-                    <!-- File Name with icon -->
-                    <td>
-                        <span class="file-icon">{{ get_file_icon(file.file_type) }}</span>
-                        {{ file.file_name }}
-                    </td>
-                    <!-- File Type -->
-                    <td>{{ file.file_type|upper }}</td>
-                    <!-- Date -->
-                    <td>
-                        {% if file.time_stamp %}
-                        {{ file.time_stamp[:19] }} <!-- Show first 19 characters (YYYY-MM-DD HH:MM:SS) -->
-                        {% else %}
-                        N/A
-                        {% endif %}
-                    </td>
-                    <!-- Department -->
-                    <td>
-                        <span class="department-tag">{{ file.department }}</span>
-                    <!-- Uploaded By -->
-                    <td>{{ file.user or 'N/A' }}</td>
-                    <!-- Project -->
-                    <td>{{ file.project or 'N/A' }}</td>
-                    <!-- Source -->
-                    <td>
-                        <span
-                            class="source-badge {% if file.source == 'discord' %}discord-badge{% else %}web-badge{% endif %}">
-                            {{ file.source|title }}
-                        </span>
-                    </td>
-                    <!-- Actions -->
-                    <td>
+        <div class="cards-grid">
+            {% for file in files %}
+            <div class="file-card" data-department="{{ file.department }}">
+                <!-- Card Header with File Name and Icon -->
+                <div class="card-header">
+                    <div class="file-icon-large">{{ get_file_icon(file.file_type) }}</div>
+                    <div class="file-name-container">
+                        <h3 class="file-name" title="{{ file.file_name }}">{{ file.file_name|truncate(30) }}</h3>
+                        <div class="file-meta">
+                            <span class="file-type">{{ file.file_type|upper }}</span>
+                            <span class="file-date">
+                                {% if file.time_stamp %}
+                                {{ format_datetime(file.time_stamp) }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body with Details -->
+                <div class="card-body">
+                    <div class="file-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Department:</span>
+                            <span class="department-badge department-{{ file.department|lower|replace(' ', '-') }}">
+                                {{ file.department }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Uploaded By:</span>
+                            <span class="detail-value">{{ file.user or 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Project:</span>
+                            <span class="detail-value">{{ file.project or 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Source:</span>
+                            <span class="source-badge {% if file.source == 'discord' %}discord-badge{% else %}web-badge{% endif %}">
+                                {{ file.source|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer with Actions -->
+                <div class="card-footer">
+                    <div class="card-actions">
                         <a href="{{ url_for('download_file', filename=file.file_name) }}" class="download-btn"
                             title="Download {{ file.file_name }}">
                             📥 Download
                         </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <a href="{{ url_for('edit_file', file_id=file.id) }}" class="edit-btn"
+                            title="Edit {{ file.file_name }}">
+                            ✏️ Edit
+                        </a>
+                        <a href="{{ url_for('delete_file', file_id=file.id) }}" class="delete-btn"
+                            title="Delete {{ file.file_name }}"
+                            onclick="return confirm('Are you sure you want to delete {{ file.file_name }}?')">
+                            🗑️ Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
         {% else %}
         <div class="no-files">
-            <p>No files found{% if selected_dept and selected_dept != 'all' %} for department: {{ selected_dept }}{%
-                endif %}.</p>
+            <p>
+                {% if search_query %}
+                No files found for "{{ search_query }}"
+                {% if selected_dept and selected_dept != 'all' %}
+                in department: {{ selected_dept }}
+                {% endif %}
+                {% else %}
+                No files found
+                {% if selected_dept and selected_dept != 'all' %}
+                for department: {{ selected_dept }}
+                {% endif %}
+                {% endif %}
+            </p>
         </div>
         {% endif %}
     </div>
 
     <!-- Statistics -->
     <div class="files-stats">
-        <p>Showing <strong>{{ files|length }}</strong> file(s)
+        <p>
+            Showing <strong>{{ files|length }}</strong> file(s)
+            {% if search_query %}
+            matching "<strong>{{ search_query }}</strong>"
+            {% endif %}
             {% if selected_dept and selected_dept != 'all' %}
             in <strong>{{ selected_dept }}</strong> department
             {% endif %}
@@ -101,17 +146,35 @@
     function filterFiles() {
         const select = document.getElementById('department-filter');
         const selectedDept = select.value;
+        const searchQuery = "{{ search_query }}";
 
-        // Redirect to filtered view
-        if (selectedDept === 'all') {
-            window.location.href = "{{ url_for('files') }}";
-        } else {
-            window.location.href = "{{ url_for('files') }}?department=" + encodeURIComponent(selectedDept);
+        let url = "{{ url_for('files') }}";
+        let params = [];
+
+        if (selectedDept !== 'all') {
+            params.push(`department=${encodeURIComponent(selectedDept)}`);
         }
+
+        if (searchQuery) {
+            params.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+
+        window.location.href = url;
     }
 
     function resetFilter() {
-        window.location.href = "{{ url_for('files') }}";
+        const searchQuery = "{{ search_query }}";
+        let url = "{{ url_for('files') }}";
+
+        if (searchQuery) {
+            url += '?search=' + encodeURIComponent(searchQuery);
+        }
+
+        window.location.href = url;
     }
 </script>
 {% endblock %}

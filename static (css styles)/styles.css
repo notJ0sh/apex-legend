@@ -464,47 +464,6 @@
         align-self: flex-end;
     }
 }
-.files-container {
-    padding: 20px;
-}
-
-.filter-section {
-    background: #f5f5f5;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.filter-section label {
-    font-weight: bold;
-    margin-right: 10px;
-}
-
-.filter-section select {
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    font-size: 14px;
-    min-width: 200px;
-}
-
-.reset-btn {
-    padding: 8px 15px;
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.reset-btn:hover {
-    background: #5a6268;
-}
 
 .files-table-container {
     overflow-x: auto;
@@ -515,7 +474,7 @@
     width: 100%;
     border-collapse: collapse;
     background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .files-table th {
@@ -598,4 +557,888 @@
     background: #e9ecef;
     border-radius: 4px;
     font-size: 14px;
+}
+
+/* Files Container */
+.files-container {
+    padding: 20px;
+}
+
+/* Filter Section Layout */
+.filter-section {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.search-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.department-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* Make the search form take full width */
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Department filter label styling */
+.department-filter-container label {
+    font-weight: bold;
+    white-space: nowrap;
+    color: #495057;
+}
+
+/* Department filter select styling */
+.department-filter-container select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+    min-width: 180px;
+}
+
+/* Reset button styling */
+.reset-btn {
+    padding: 8px 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.reset-btn:hover {
+    background: #5a6268;
+}
+
+/* Search Bar Styles */
+.search-bar {
+    margin-bottom: 15px;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 500px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 250px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.search-btn:hover {
+    background: #0056b3;
+}
+
+.clear-search {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
+.clear-search:hover {
+    color: #495057;
+    text-decoration: underline;
+}
+
+/* Make the date column a bit wider */
+.files-table td:nth-child(3) {
+    min-width: 150px;
+    font-family: monospace;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .search-container {
+        min-width: 100%;
+    }
+
+    .department-filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .department-filter-container label {
+        margin-bottom: 5px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .files-table td:last-child {
+        min-width: 150px;
+    }
+}
+
+/* Action buttons for files */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: #212529;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+    color: #212529;
+    text-decoration: none;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    color: white;
+    text-decoration: none;
+}
+
+/* Make actions column wider */
+.files-table td:last-child {
+    min-width: 180px;
+}
+
+/* Files Cards Layout */
+/* Files Cards Layout */
+.files-cards-container {
+    margin: 20px 0;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.file-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #007bff;
+    /* Default blue border */
+    display: flex;
+    flex-direction: column;
+    height: 280px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.file-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Department-specific border colors - UPDATED TO MATCH YOUR SPECS */
+.file-card[data-department="IT"] {
+    border-left-color: #007bff;
+    /* Blue */
+}
+
+.file-card[data-department="Finance"] {
+    border-left-color: #ff9800;
+    /* Orange */
+}
+
+.file-card[data-department="Logistics"] {
+    border-left-color: #9c27b0;
+    /* Purple */
+}
+
+.file-card[data-department="HR"] {
+    border-left-color: #e91e63;
+    /* Pink */
+}
+
+.file-card[data-department="Sales"] {
+    border-left-color: #ffeb3b;
+    /* Yellow */
+    border-left-width: 4px;
+}
+
+/* Add more department colors as needed */
+.file-card[data-department="Engineering"] {
+    border-left-color: #007bff;
+}
+
+.file-card[data-department="Design"] {
+    border-left-color: #28a745;
+}
+
+.file-card[data-department="Marketing"] {
+    border-left-color: #ffc107;
+}
+
+.file-card[data-department="Operations"] {
+    border-left-color: #fd7e14;
+}
+
+/* Card Header */
+.card-header {
+    padding: 20px 20px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.file-icon-large {
+    font-size: 32px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.file-name-container {
+    flex: 1;
+    min-width: 0;
+    /* Allows text truncation */
+}
+
+.file-name {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2f3136;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-type {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-date {
+    font-size: 13px;
+    color: #6c757d;
+    font-family: monospace;
+}
+
+/* Card Body */
+.card-body {
+    padding: 15px 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 24px;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 500;
+    min-width: 100px;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+.department-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    min-width: 80px;
+}
+
+/* Department badge colors - EXACTLY MATCHING BORDER COLORS */
+.department-it {
+    background: #007bff;
+    /* Blue - matches IT border */
+}
+
+.department-finance {
+    background: #ff9800;
+    /* Orange - matches Finance border */
+}
+
+.department-logistics {
+    background: #9c27b0;
+    /* Purple - matches Logistics border */
+}
+
+.department-hr {
+    background: #e91e63;
+    /* Pink - matches HR border */
+}
+
+.department-sales {
+    background: #ffeb3b;
+    /* Yellow - matches Sales border */
+    color: #212529;
+    /* Dark text for yellow background */
+}
+
+/* Add matching colors for other departments */
+.department-engineering {
+    background: #007bff;
+}
+
+.department-design {
+    background: #28a745;
+}
+
+.department-marketing {
+    background: #ffc107;
+    color: #212529;
+}
+
+.department-operations {
+    background: #fd7e14;
+}
+
+/* Card Footer */
+.card-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+    border-radius: 0 0 10px 10px;
+    flex-shrink: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.card-actions .download-btn,
+.card-actions .edit-btn,
+.card-actions .delete-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.card-actions .download-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+}
+
+.card-actions .download-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.card-actions .edit-btn {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+}
+
+.card-actions .edit-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+.card-actions .delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+}
+
+.card-actions .delete-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .file-card {
+        height: auto;
+        min-height: 250px;
+    }
+
+    .card-actions {
+        flex-wrap: wrap;
+    }
+
+    .card-actions .download-btn,
+    .card-actions .edit-btn,
+    .card-actions .delete-btn {
+        min-width: 100px;
+        flex: none;
+    }
+
+    .detail-value {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-card {
+        margin: 0 5px;
+    }
+
+    .card-header {
+        padding: 15px;
+    }
+
+    .card-body {
+        padding: 12px 15px;
+    }
+
+    .card-footer {
+        padding: 12px 15px;
+    }
+
+    .file-icon-large {
+        font-size: 28px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .file-name {
+        font-size: 16px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .detail-label {
+        min-width: auto;
+    }
+
+    .detail-value {
+        text-align: left;
+        max-width: 100%;
+    }
+}
+
+/* Department-specific border colors */
+.file-card[data-department="Engineering"] {
+    border-left-color: #007bff;
+}
+
+.file-card[data-department="Design"] {
+    border-left-color: #28a745;
+}
+
+.file-card[data-department="Marketing"] {
+    border-left-color: #ffc107;
+}
+
+.file-card[data-department="Sales"] {
+    border-left-color: #dc3545;
+}
+
+.file-card[data-department="HR"] {
+    border-left-color: #6f42c1;
+}
+
+.file-card[data-department="Finance"] {
+    border-left-color: #17a2b8;
+}
+
+.file-card[data-department="Operations"] {
+    border-left-color: #fd7e14;
+}
+
+/* Card Header */
+.card-header {
+    padding: 20px 20px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.file-icon-large {
+    font-size: 32px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.file-name-container {
+    flex: 1;
+    min-width: 0;
+    /* Allows text truncation */
+}
+
+.file-name {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2f3136;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-type {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-date {
+    font-size: 13px;
+    color: #6c757d;
+    font-family: monospace;
+}
+
+/* Card Body */
+.card-body {
+    padding: 15px 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 24px;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 500;
+    min-width: 100px;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+.department-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    min-width: 80px;
+}
+
+.department-engineering {
+    background: #007bff;
+}
+
+.department-design {
+    background: #28a745;
+}
+
+.department-marketing {
+    background: #ffc107;
+    color: #212529;
+}
+
+.department-sales {
+    background: #dc3545;
+}
+
+.department-hr {
+    background: #6f42c1;
+}
+
+.department-finance {
+    background: #17a2b8;
+}
+
+.department-operations {
+    background: #fd7e14;
+}
+
+/* Card Footer */
+.card-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+    border-radius: 0 0 10px 10px;
+    flex-shrink: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.card-actions .download-btn,
+.card-actions .edit-btn,
+.card-actions .delete-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.card-actions .download-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+}
+
+.card-actions .download-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.card-actions .edit-btn {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+}
+
+.card-actions .edit-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+.card-actions .delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+}
+
+.card-actions .delete-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .file-card {
+        height: auto;
+        min-height: 250px;
+    }
+
+    .card-actions {
+        flex-wrap: wrap;
+    }
+
+    .card-actions .download-btn,
+    .card-actions .edit-btn,
+    .card-actions .delete-btn {
+        min-width: 100px;
+        flex: none;
+    }
+
+    .detail-value {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-card {
+        margin: 0 5px;
+    }
+
+    .card-header {
+        padding: 15px;
+    }
+
+    .card-body {
+        padding: 12px 15px;
+    }
+
+    .card-footer {
+        padding: 12px 15px;
+    }
+
+    .file-icon-large {
+        font-size: 28px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .file-name {
+        font-size: 16px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .detail-label {
+        min-width: auto;
+    }
+
+    .detail-value {
+        text-align: left;
+        max-width: 100%;
+    }
 }
