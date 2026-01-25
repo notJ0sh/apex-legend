@@ -26,10 +26,10 @@ INSERT INTO files (file_name, file_type, file_path, user, group_name, department
 -- file #2
 ('ADA report', 'WORD', '/downloads/ada_report.docx', 'maitri', 'team2', 'IT', 'ADA26', 'web', 'user_002', 'msg_002', 'ch_002'),
 -- file #3
-('USG docs', 'DOC', '/downloads/usg_docs.doc', 'joshua', 'team3', 'Finance', 'WDP26', 'discord', 'user_003', 'msg_003', 'ch_003'),
+('USG docs', 'DOC', '/downloads/usg_docs.doc', 'joshua', 'team3', 'FINANCE', 'WDP26', 'discord', 'user_003', 'msg_003', 'ch_003'),
 -- file #4
-('SRM pdf', 'PDF', '/downloads/srm_pdf.pdf', 'travis', 'team4', 'Logistics', 'ADA26', 'web', 'user_004', 'msg_004', 'ch_004'),
+('SRM pdf', 'PDF', '/downloads/srm_pdf.pdf', 'travis', 'team4', 'LOGISTICS', 'ADA26', 'web', 'user_004', 'msg_004', 'ch_004'),
 -- file #5
-('PCS jpg', 'JPG', '/downloads/pcs_jpg.jpg', 'notjosh', 'team5', 'Marketing', 'WDP26', 'discord', 'user_005', 'msg_005', 'ch_005'),
+('PCS jpg', 'JPG', '/downloads/pcs_jpg.jpg', 'notjosh', 'team5', 'MARKETING', 'WDP26', 'discord', 'user_005', 'msg_005', 'ch_005'),
 -- file #6
 ('DDA pdf', 'PDF', '/downloads/dda_pdf.pdf', 'notmaitri', 'team6', 'IT', 'ADA26', 'web', 'user_006', 'msg_006', 'ch_006');
