@@ -1,0 +1,217 @@
+<!-- templates (HTML pages)/edit-file.html -->
+{% extends "base.html" %}
+
+{% block title %}Edit File - Apex Legend App{% endblock %}
+
+{% block content %}
+<div class="edit-file-container">
+    <h2>Edit File: {{ file.file_name }}</h2>
+
+    <div class="edit-form-container">
+        <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
+            <!-- Current File Info -->
+            <div class="current-info">
+                <h3>Current File Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Current File Name:</span>
+                        <span class="info-value">{{ file.file_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Department:</span>
+                        <span class="info-value">{{ file.department }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Project:</span>
+                        <span class="info-value">{{ file.project or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">File Type:</span>
+                        <span class="info-value">{{ file.file_type }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Source:</span>
+                        <span class="info-value">{{ file.source|title }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Fields -->
+            <div class="edit-fields">
+                <h3>Edit Fields</h3>
+
+                <div class="form-group">
+                    <label for="file_name">File Name</label>
+                    <input type="text" id="file_name" name="file_name" value="{{ file.file_name }}"
+                        placeholder="Enter new file name" required>
+                    <div class="error-message" id="fileNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if dept==file.department %}selected{% endif %}>
+                            {{ dept }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="error-message" id="departmentError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="project">Project</label>
+                    <input type="text" id="project" name="project" value="{{ file.project or '' }}"
+                        placeholder="Enter project name" required>
+                    <div class="error-message" id="projectError"></div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{{ url_for('files') }}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary" id="submitBtn">Update File</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="messageContainer" class="message-container"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('editFileForm');
+        const fileNameInput = document.getElementById('file_name');
+        const projectInput = document.getElementById('project');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageContainer = document.getElementById('messageContainer');
+
+        // Validation functions
+        function validateFileName(fileName) {
+            if (!fileName.trim()) {
+                return "File name cannot be empty";
+            }
+            if (fileName.trim().match(/^\d+$/)) {
+                return "File name cannot be just numbers";
+            }
+            return "";
+        }
+
+        function validateProject(project) {
+            if (!project.trim()) {
+                return "Project cannot be empty";
+            }
+            if (project.trim().match(/^\d+$/)) {
+                return "Project cannot be just numbers";
+            }
+            return "";
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Validate file name
+            const fileNameError = validateFileName(fileNameInput.value);
+            const fileNameErrorElement = document.getElementById('fileNameError');
+            if (fileNameError) {
+                fileNameErrorElement.textContent = fileNameError;
+                fileNameErrorElement.style.display = 'block';
+                isValid = false;
+            } else {
+                fileNameErrorElement.style.display = 'none';
+            }
+
+            // Validate project
+            const projectError = validateProject(projectInput.value);
+            const projectErrorElement = document.getElementById('projectError');
+            if (projectError) {
+                projectErrorElement.textContent = projectError;
+                projectErrorElement.style.display = 'block';
+                isValid = false;
+            } else {
+                projectErrorElement.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        // Real-time validation
+        fileNameInput.addEventListener('input', function () {
+            const error = validateFileName(this.value);
+            const errorElement = document.getElementById('fileNameError');
+            if (error) {
+                errorElement.textContent = error;
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+
+        projectInput.addEventListener('input', function () {
+            const error = validateProject(this.value);
+            const errorElement = document.getElementById('projectError');
+            if (error) {
+                errorElement.textContent = error;
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                showMessage('Please fix the errors above.', 'error');
+                return;
+            }
+
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            // Submit form
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showMessage('File updated successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('files') }}";
+                        }, 1500);
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error: ' + error.message, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Update File';
+                });
+        });
+
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `
+            <div class="message ${type}">
+                ${message}
+            </div>
+        `;
+            messageContainer.style.display = 'block';
+
+            // Auto-hide success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageContainer.style.display = 'none';
+                }, 3000);
+            }
+        }
+    });
+</script>
+{% endblock %}

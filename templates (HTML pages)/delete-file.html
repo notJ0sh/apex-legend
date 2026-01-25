@@ -1,0 +1,150 @@
+<!-- templates (HTML pages)/delete-file.html -->
+{% extends "base.html" %}
+
+{% block title %}Delete File - Apex Legend App{% endblock %}
+
+{% block content %}
+<div class="delete-file-container">
+    <h2>Delete File</h2>
+    
+    <div class="delete-confirmation">
+        <div class="warning-message">
+            <h3>⚠️ Warning: This action cannot be undone!</h3>
+            <p>You are about to permanently delete the following file:</p>
+        </div>
+        
+        <div class="file-details">
+            <div class="detail-item">
+                <span class="detail-label">File Name:</span>
+                <span class="detail-value">{{ file.file_name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">File Type:</span>
+                <span class="detail-value">{{ file.file_type }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Department:</span>
+                <span class="detail-value">{{ file.department }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Project:</span>
+                <span class="detail-value">{{ file.project or 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Uploaded By:</span>
+                <span class="detail-value">{{ file.user or 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">
+                    {% if file.time_stamp %}
+                    {{ format_datetime(file.time_stamp) }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="confirmation-prompt">
+            <p><strong>Are you sure you want to delete this file?</strong></p>
+            <p>This will:</p>
+            <ul>
+                <li>Permanently remove the file from the database</li>
+                <li>Delete the actual file from the server</li>
+                <li>This action cannot be undone</li>
+            </ul>
+        </div>
+        
+        <div class="confirmation-input">
+            <label for="confirmText">
+                Type "DELETE" to confirm:
+            </label>
+            <input type="text" id="confirmText" placeholder="Type DELETE here">
+            <div class="error-message" id="confirmError"></div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="{{ url_for('files') }}" class="btn-secondary">Cancel</a>
+            <button id="deleteBtn" class="btn-danger" disabled>Delete File</button>
+        </div>
+    </div>
+    
+    <!-- Messages Container -->
+    <div id="messageContainer" class="message-container"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmInput = document.getElementById('confirmText');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const confirmError = document.getElementById('confirmError');
+    const messageContainer = document.getElementById('messageContainer');
+    
+    // Enable delete button only when "DELETE" is typed
+    confirmInput.addEventListener('input', function() {
+        const isConfirmed = this.value.trim().toUpperCase() === 'DELETE';
+        
+        if (isConfirmed) {
+            deleteBtn.disabled = false;
+            confirmError.style.display = 'none';
+        } else {
+            deleteBtn.disabled = true;
+            confirmError.style.display = 'block';
+            confirmError.textContent = 'Please type "DELETE" to confirm';
+        }
+    });
+    
+    // Delete button click handler
+    deleteBtn.addEventListener('click', function() {
+        if (!confirmInput.value.trim().toUpperCase() === 'DELETE') {
+            return;
+        }
+        
+        // Show final confirmation dialog
+        if (!confirm('Are you absolutely sure? This action cannot be undone!')) {
+            return;
+        }
+        
+        // Disable button and show loading
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Deleting...';
+        
+        // Send delete request
+        fetch("{{ url_for('delete_file', file_id=file.id) }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ confirm: 'DELETE' })
+        })
+        .then(response => {
+            if (response.ok) {
+                showMessage('File deleted successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('files') }}";
+                }, 1500);
+            } else {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error.message, 'error');
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Delete File';
+        });
+    });
+    
+    function showMessage(message, type) {
+        messageContainer.innerHTML = `
+            <div class="message ${type}">
+                ${message}
+            </div>
+        `;
+        messageContainer.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

@@ -5,6 +5,8 @@ from flask_login import current_user
 from auth_user_routes import register_auth_routes
 from database_helpers import get_database, USER_DATABASE, get_files_by_department, FILES_DATABASE
 from models import File
+import os
+from werkzeug.utils import secure_filename
 
 #      -----      {{{     ROUTES (MAIN EVENTS)     }}}      -----      #
 def get_file_icon(file_type):
@@ -154,14 +156,141 @@ def register_routes(app):
         from database_helpers import get_file_download
         return get_file_download(filename)
     
-    # Edit file route
+    #Shows the edit form
     @app.route('/edit-file/<int:file_id>')
     def edit_file(file_id):
-        # We'll implement this later - for now just show a placeholder
-        return f"Edit file page for file ID: {file_id} - To be implemented"
+        # Check if user is admin
+        if current_user.role != 'admin':
+            return "Unauthorized - Admin access required", 403
+        
+        # Get file data from database
+        db = get_database(FILES_DATABASE)
+        file_data = db.execute(
+            'SELECT * FROM files WHERE id = ?', 
+            (file_id,)
+        ).fetchone()
+        
+        if not file_data:
+            return "File not found", 404
+        
+        # Convert to File object
+        file = File.from_row(file_data)
+        
+        # Get all departments for dropdown
+        departments = db.execute(
+            'SELECT DISTINCT department FROM files ORDER BY department'
+        ).fetchall()
+        departments = [dept[0] for dept in departments if dept[0]]
+        
+        return render_template('edit-file.html', 
+                            file=file, 
+                            departments=departments)
 
-    # Delete file route
+    #Actually processes the form submissions 
+    @app.route('/update-file/<int:file_id>', methods=['POST'])
+    def update_file(file_id):
+        # Check if user is admin
+        if current_user.role != 'admin':
+            return "Unauthorized - Admin access required", 403
+        
+        # Get form data
+        file_name = request.form.get('file_name', '').strip()
+        department = request.form.get('department', '').strip()
+        project = request.form.get('project', '').strip()
+        
+        # Validation
+        if not file_name:
+            return "File name cannot be empty", 400
+        
+        if not project:
+            return "Project cannot be empty", 400
+        
+        # Check if file name is just numbers
+        if file_name.isdigit():
+            return "File name cannot be just numbers", 400
+        
+        # Check if project is just numbers
+        if project.isdigit():
+            return "Project cannot be just numbers", 400
+        
+        # Get current file data
+        db = get_database(FILES_DATABASE)
+        current_file = db.execute(
+            'SELECT * FROM files WHERE id = ?', 
+            (file_id,)
+        ).fetchone()
+        
+        if not current_file:
+            return "File not found", 404
+        
+        # Check if file name already exists (excluding current file)
+        existing_file = db.execute(
+            'SELECT id FROM files WHERE file_name = ? AND id != ?', 
+            (file_name, file_id)
+        ).fetchone()
+        
+        if existing_file:
+            return f"File name '{file_name}' already exists", 400
+        
+        # Update file in database
+        try:
+            db.execute(
+                '''UPDATE files 
+                SET file_name = ?, department = ?, project = ?
+                WHERE id = ?''',
+                (file_name, department, project, file_id)
+            )
+            db.commit()
+            
+            # Rename the actual file if file name changed
+            if file_name != current_file['file_name']:
+                old_path = os.path.join('downloads', current_file['file_name'])
+                new_path = os.path.join('downloads', secure_filename(file_name))
+                
+                if os.path.exists(old_path):
+                    os.rename(old_path, new_path)
+                    # Update file_path in database
+                    db.execute(
+                        'UPDATE files SET file_path = ? WHERE id = ?',
+                        (new_path, file_id)
+                    )
+                    db.commit()
+            
+            return redirect(url_for('files'))
+            
+        except Exception as e:
+            print(f"Error updating file: {e}")
+            return "Failed to update file", 500
+
+    #Delete files
     @app.route('/delete-file/<int:file_id>', methods=['POST'])
     def delete_file(file_id):
-        # We'll implement this later - for now just show a placeholder
-        return f"Delete file for file ID: {file_id} - To be implemented"
+        # Check if user is admin
+        if current_user.role != 'admin':
+            return "Unauthorized - Admin access required", 403
+        
+        # Get file data first
+        db = get_database(FILES_DATABASE)
+        file_data = db.execute(
+            'SELECT * FROM files WHERE id = ?', 
+            (file_id,)
+        ).fetchone()
+        
+        if not file_data:
+            return "File not found", 404
+        
+        try:
+            # Delete file from database
+            db.execute('DELETE FROM files WHERE id = ?', (file_id,))
+            db.commit()
+            
+            # Delete actual file from downloads folder
+            file_path = os.path.join('downloads', file_data['file_name'])
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            
+            return redirect(url_for('files'))
+            
+        except Exception as e:
+            print(f"Error deleting file: {e}")
+            return "Failed to delete file", 500
