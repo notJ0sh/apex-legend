@@ -791,7 +791,7 @@
     /* Default blue border */
     display: flex;
     flex-direction: column;
-    height: 280px;
+    height: 340px;
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
 }
@@ -913,14 +913,14 @@
 .file-details {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .detail-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 24px;
+    min-height: 20px;
 }
 
 .detail-label {
