@@ -1,0 +1,63 @@
+/* GLOBAL STYLES */
+body {
+    min-height: 100vh;background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%); /* Blue Gradient */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* SIDEBAR STYLING */
+.sidebar {
+    background-color: #343a40 !important; /* Dark Grey */
+    z-index: 1000;
+}
+
+/* Logo Area with Blue Underline */
+.sidebar-header {
+    border-bottom: 3px solid #0d6efd; /* The Blue Line */
+    margin-bottom: 10px;
+}
+
+/* SIDEBAR LINKS */
+.nav-link {
+    color: #ccc !important; /* Light grey text */
+    padding: 15px 20px;
+    font-weight: 500;
+    border-radius: 0; /* Square edges like screenshot */
+    transition: background-color 0.2s;
+}
+
+/* Hover State */
+.nav-link:hover {
+    background-color: #495057; /* Slightly lighter grey */
+    color: white !important;
+}
+
+/* Active State (Selected Page) */
+.nav-link.active {
+    background-color: #495057; /* Dark Grey highlight */
+    color: white !important;
+    border-left: 4px solid #0d6efd; /* Optional: Blue marker on left */
+}
+
+/* TOP WHITE BAR */
+header {
+    z-index: 900;
+}
+
+/* CARD STYLING */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+.card-header {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: bold;
+}
+
+/* TABLES */
+.table { background-color: white; border-radius: 10px; overflow: hidden; }
+.table thead { background-color: #212529; color: white; }

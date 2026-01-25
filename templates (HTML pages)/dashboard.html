@@ -1,13 +1,80 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Apex Legend{% endblock %}
-
 {% block content %}
-<div class="homepage">
-    <h1>Welcome to Apex Legend App</h1>
-    <p>This is the homepage of our application.</p>
-    <div class="quick-links">
-        <p><a href="{{ url_for('login') }}">Login</a></p>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total User</h5>
+                    <p class="display-4 fw-bold">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Active User</h5>
+                    <p class="display-4 fw-bold">{{ stats.active }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-warning mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Suspended</h5>
+                    <p class="display-4 fw-bold">{{ stats.suspended }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-info mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">New User</h5>
+                    <p class="display-4 fw-bold">{{ stats.new }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white"><h5 class="mb-0">User Status</h5></div>
+                <div class="card-body"><div id="piechart_3d" style="width: 100%; height: 300px;"></div></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white"><h5 class="mb-0">User Growth History</h5></div>
+                <div class="card-body"><div id="linechart_material" style="width: 100%; height: 300px;"></div></div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart', 'line']});
+  google.charts.setOnLoadCallback(drawCharts);
+
+  function drawCharts() {
+    drawPieChart();
+    drawLineChart();
+  }
+
+  function drawPieChart() {
+    var data = google.visualization.arrayToDataTable({{ pie_data | tojson }});
+    var options = { is3D: true, backgroundColor: 'transparent', chartArea: {width: '90%', height: '80%'}, legend: {position: 'bottom'} };
+    var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+    chart.draw(data, options);
+  }
+
+  function drawLineChart() {
+    var data = google.visualization.arrayToDataTable({{ line_data | tojson }});
+    var options = { chart: { title: 'User Growth', subtitle: 'New vs Total (Last 6 Months)' }, height: 300, backgroundColor: 'transparent' };
+    var chart = new google.charts.Line(document.getElementById('linechart_material'));
+    chart.draw(data, google.charts.Line.convertOptions(options));
+  }
+</script>
 {% endblock %}
