@@ -30,6 +30,6 @@ INSERT INTO files (file_name, file_type, file_path, user, group_name, department
 -- file #4
 ('SRM pdf', 'PDF', '/downloads/srm_pdf.pdf', 'travis', 'team4', 'Logistics', 'ADA26', 'web', 'user_004', 'msg_004', 'ch_004'),
 -- file #5
-('PCS jpg', 'JPG', '/downloads/pcs_jpg.jpg', 'notjosh', 'team5', 'Sales', 'WDP26', 'discord', 'user_005', 'msg_005', 'ch_005'),
+('PCS jpg', 'JPG', '/downloads/pcs_jpg.jpg', 'notjosh', 'team5', 'Marketing', 'WDP26', 'discord', 'user_005', 'msg_005', 'ch_005'),
 -- file #6
 ('DDA pdf', 'PDF', '/downloads/dda_pdf.pdf', 'notmaitri', 'team6', 'IT', 'ADA26', 'web', 'user_006', 'msg_006', 'ch_006');
