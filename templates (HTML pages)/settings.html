@@ -143,7 +143,7 @@
 
                 <div class="info-card">
                     <h3>Send Feedback</h3>
-                    <form id="feedbackForm">
+                    <form id="feedbackForm" onsubmit="submitFeedback(event)">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="feedback_type">Feedback Type</label>
@@ -161,7 +161,14 @@
                             <div class="form-group">
                                 <label for="subject">Subject</label>
                                 <input type="text" id="subject" name="subject"
-                                    placeholder="Brief description of your feedback" required>
+                                    placeholder="Brief description of your feedback" minlength="5"
+                                    pattern="^(?:[a-zA-Z\s]+|[a-zA-Z0-9\s\W_]*[a-zA-Z][a-zA-Z0-9\s\W_]*)$"
+                                    title="Subject must be at least 5 characters. If it contains numbers or special characters, it must also include at least one letter."
+                                    required>
+                                <p class="form-help">
+                                    Minimum 5 characters. Can contain only letters, or letters with numbers and special
+                                    characters.
+                                </p>
                             </div>
                         </div>
 
@@ -169,8 +176,18 @@
                             <div class="form-group">
                                 <label for="message">Message</label>
                                 <textarea id="message" name="message"
-                                    placeholder="Please provide details about your feedback..." rows="6"
-                                    required></textarea>
+                                    placeholder="Please provide details about your feedback..." rows="6" minlength="10"
+                                    oninput="validateMessage(this)" required></textarea>
+                                <p class="form-help">
+                                    Minimum 10 characters. Can contain only letters, or letters with numbers and special
+                                    characters. If numbers or special characters are present, at least one letter is
+                                    required.
+                                </p>
+                                <div id="message-error" class="error-message"
+                                    style="display: none; color: #ff6b6b; font-size: 0.875rem; margin-top: 0.25rem;">
+                                    Message must contain at least one letter. If it has numbers or special characters,
+                                    letters are required.
+                                </div>
                             </div>
                         </div>
 
@@ -230,16 +247,6 @@
                     document.getElementById(tabId).classList.add('active');
                 });
             });
-
-            // Feedback form submission
-            const feedbackForm = document.getElementById('feedbackForm');
-            if (feedbackForm) {
-                feedbackForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    alert('Thank you for your feedback!');
-                    this.reset();
-                });
-            }
         }
     });
 
@@ -256,6 +263,59 @@
         if (confirm('Clear all feedback fields?')) {
             const form = document.getElementById('feedbackForm');
             if (form) form.reset();
+            // Hide any error message when resetting
+            const errorMsg = document.getElementById('message-error');
+            if (errorMsg) errorMsg.style.display = 'none';
+        }
+    }
+
+    // Validate message field in real-time
+    function validateMessage(textarea) {
+        const message = textarea.value;
+        const errorMsg = document.getElementById('message-error');
+        const messagePattern = /^(?:[a-zA-Z\s]+|[a-zA-Z0-9\s\W_]*[a-zA-Z][a-zA-Z0-9\s\W_]*)$/;
+
+        if (message.length >= 10 && !messagePattern.test(message)) {
+            errorMsg.style.display = 'block';
+            textarea.setCustomValidity('Message must contain at least one letter. If it has numbers or special characters, letters are required.');
+        } else {
+            errorMsg.style.display = 'none';
+            textarea.setCustomValidity('');
+        }
+    }
+
+    // Handle form submission
+    function submitFeedback(event) {
+        event.preventDefault();
+        const form = event.target;
+
+        // Validate message field one more time before submission
+        const messageField = document.getElementById('message');
+        validateMessage(messageField);
+
+        // Check if form is valid using HTML5 validation
+        if (form.checkValidity()) {
+            // Check message pattern validation
+            const messagePattern = /^(?:[a-zA-Z\s]+|[a-zA-Z0-9\s\W_]*[a-zA-Z][a-zA-Z0-9\s\W_]*)$/;
+            const message = messageField.value;
+
+            if (message.length >= 10 && !messagePattern.test(message)) {
+                // Show error message
+                const errorMsg = document.getElementById('message-error');
+                errorMsg.style.display = 'block';
+                messageField.setCustomValidity('Message must contain at least one letter. If it has numbers or special characters, letters are required.');
+                messageField.reportValidity();
+                return false;
+            }
+
+            // If everything is valid, show success message and reset
+            alert('Thank you for your feedback!');
+            form.reset();
+            const errorMsg = document.getElementById('message-error');
+            if (errorMsg) errorMsg.style.display = 'none';
+        } else {
+            // Let HTML5 validation show the errors
+            form.reportValidity();
         }
     }
 </script>
