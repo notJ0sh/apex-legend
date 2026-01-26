@@ -155,4 +155,4 @@ if __name__ == '__main__':
 
     # Start Flask web server on main thread
     # use_reloader=False is critical to prevent the bot thread from starting twice
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False, host='0.0.0.0')
