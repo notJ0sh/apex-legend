@@ -2,66 +2,155 @@
 
 import logging
 import os
+import json  # <--- Crucial for the new feature
 from datetime import datetime, timedelta 
 from flask import abort, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from database_helpers import get_database, USER_DATABASE
 from models import User
 
-#      -----      {{{     GLOBAL MEMORY (For Demo)     }}}      -----      #
+#      -----      {{{     GLOBAL MEMORY     }}}      -----      #
 TEMP_NEW_USERS = [] 
+MAINTENANCE_FILE = 'maintenance_config.json'
 
-# Helper function to handle the Deleted Count File
+# --- HELPER FUNCTIONS ---
 def get_deleted_count():
-    if not os.path.exists('deleted_count.txt'):
-        return 0
+    if not os.path.exists('deleted_count.txt'): return 0
     with open('deleted_count.txt', 'r') as f:
-        try:
-            return int(f.read().strip())
-        except ValueError:
-            return 0
+        try: return int(f.read().strip())
+        except ValueError: return 0
 
 def increment_deleted_count():
     current = get_deleted_count()
     new_count = current + 1
-    with open('deleted_count.txt', 'w') as f:
-        f.write(str(new_count))
+    with open('deleted_count.txt', 'w') as f: f.write(str(new_count))
     return new_count
+
+# --- NEW: SMART MAINTENANCE CHECK ---
+def check_maintenance_lock(user_obj=None):
+    if not os.path.exists(MAINTENANCE_FILE):
+        return False, None
+
+    try:
+        with open(MAINTENANCE_FILE, 'r') as f:
+            config = json.load(f)
+    except:
+        return False, None 
+
+    if not config.get('active', False):
+        return False, None
+
+    # Admins are ALWAYS allowed
+    if user_obj and user_obj.role == 'admin':
+        return False, None
+
+    duration = config.get('duration', 'Unknown')
+    
+    # 1. Global Lock?
+    if 'ALL_DEPARTMENTS' in config.get('departments', []):
+        return True, duration
+
+    if user_obj:
+        # 2. Department Lock?
+        if user_obj.department and user_obj.department in config.get('departments', []):
+            return True, duration
+        
+        # 3. Specific User Lock?
+        if user_obj.username in config.get('users', []):
+            return True, duration
+
+    return False, None
+
 
 #      -----      {{{     AUTH ROUTES     }}}      -----      #
 
 def register_auth_routes(app):
-    """Register authentication routes."""
 
-    # --- 0. HOME ROUTE (Updated to Read Broadcast) ---
+    # --- 0. HOME ROUTE ---
     @app.route('/')
     @app.route('/home')
     def home():
         if not current_user.is_authenticated:
             return redirect(url_for('login'))
         
-        # READ BROADCAST MESSAGE
+        # Check Maintenance
+        is_blocked, duration = check_maintenance_lock(current_user)
+        if is_blocked:
+            logout_user()
+            return render_template('maintenance.html', duration=duration)
+
         broadcast_msg = None
         if os.path.exists('broadcast.txt'):
             with open('broadcast.txt', 'r') as f:
                 content = f.read().strip()
-                if content: # Only show if not empty
-                    broadcast_msg = content
+                if content: broadcast_msg = content
 
         return render_template('homepage.html', broadcast_msg=broadcast_msg)
 
-    # --- 10. BROADCAST SYSTEM (New Feature) ---
+    # --- 11. PREPARE MAINTENANCE (Password Check) ---
+    # This is the specific route your error said was missing!
+    @app.route('/prepare_maintenance', methods=['POST'])
+    @login_required
+    def prepare_maintenance():
+        if current_user.role != 'admin': abort(403)
+        
+        password = request.form.get('password')
+        if password == "12345":
+            # Password Good! Get data for the setup page
+            db = get_database(USER_DATABASE)
+            users = db.execute('SELECT username, user_role FROM users').fetchall()
+            
+            # Get unique departments
+            all_users = db.execute('SELECT DISTINCT department FROM users').fetchall()
+            departments = [row['department'] for row in all_users if row['department']]
+            
+            return render_template('maintenance_setup.html', users=users, departments=departments)
+        else:
+            flash("Wrong Admin Password!", "danger")
+            return redirect(url_for('dashboard'))
+
+    # --- 12. CONFIRM MAINTENANCE (Save Rules) ---
+    @app.route('/confirm_maintenance', methods=['POST'])
+    @login_required
+    def confirm_maintenance():
+        if current_user.role != 'admin': abort(403)
+        
+        duration = request.form.get('duration')
+        target_depts = request.form.getlist('departments')
+        target_users = request.form.getlist('users')
+        
+        config = {
+            "active": True,
+            "duration": duration,
+            "departments": target_depts,
+            "users": target_users
+        }
+        
+        with open(MAINTENANCE_FILE, 'w') as f:
+            json.dump(config, f)
+            
+        flash("Maintenance Mode Activated!", "warning")
+        return redirect(url_for('dashboard'))
+
+    # --- 13. DISABLE MAINTENANCE ---
+    @app.route('/disable_maintenance')
+    @login_required
+    def disable_maintenance():
+        if current_user.role != 'admin': abort(403)
+        
+        if os.path.exists(MAINTENANCE_FILE):
+            os.remove(MAINTENANCE_FILE)
+            
+        flash("Maintenance Mode Disabled.", "success")
+        return redirect(url_for('dashboard'))
+
+    # --- 10. BROADCAST SYSTEM ---
     @app.route('/post_broadcast', methods=['POST'])
     @login_required
     def post_broadcast():
         if current_user.role != 'admin': abort(403)
-        
         message = request.form.get('message')
-        
-        # Save message to a text file
-        with open('broadcast.txt', 'w') as f:
-            f.write(message)
-            
+        with open('broadcast.txt', 'w') as f: f.write(message)
         return redirect(url_for('dashboard'))
 
     # --- 1. LOGIN ---
@@ -77,28 +166,26 @@ def register_auth_routes(app):
             if not username or not password:
                 error = 'Username and password are required.'
             else:
-                curr = db.execute(
-                    'SELECT id, username, user_role, department FROM users WHERE username = ? AND user_password = ?',
-                    (username, password)
-                )
+                curr = db.execute('SELECT id, username, user_role, department FROM users WHERE username = ? AND user_password = ?', (username, password))
                 user_data = curr.fetchone()
 
                 if user_data:
-                    user_obj = User(
-                        id=user_data['id'],
-                        username=user_data['username'],
-                        user_role=user_data['user_role'],
-                        department=user_data['department']
-                    )
-                    login_user(user_obj)
-                    session['user'] = user_obj.username
-                    session['role'] = user_obj.role
-                    logging.info(f"User: {user_obj.username} | Role: {user_obj.role} | Action: Logged In")
+                    role = user_data['user_role']
+                    temp_user = User(id=user_data['id'], username=user_data['username'], user_role=role, department=user_data['department'])
                     
-                    if user_obj.role == 'admin':
-                        return redirect(url_for('dashboard'))
-                    else:
-                        return redirect(url_for('home'))
+                    # --- SECURITY CHECK: SMART LOCK ---
+                    is_blocked, duration = check_maintenance_lock(temp_user)
+                    if is_blocked:
+                        return render_template('maintenance.html', duration=duration)
+                    # ----------------------------------
+
+                    login_user(temp_user)
+                    session['user'] = temp_user.username
+                    session['role'] = temp_user.role
+                    logging.info(f"User: {temp_user.username} | Role: {temp_user.role} | Action: Logged In")
+                    
+                    if temp_user.role == 'admin': return redirect(url_for('dashboard'))
+                    else: return redirect(url_for('home'))
                 else:
                     error = 'Invalid username or password.'
 
@@ -107,9 +194,8 @@ def register_auth_routes(app):
     # --- 2. LOGOUT ---
     @app.route('/logout')
     def logout():
-        user_name = current_user.username if current_user.is_authenticated else "Unknown"
-        if user_name != "Unknown":
-            logging.info(f"User: {user_name} | Action: Logged Out")
+        if current_user.is_authenticated:
+            logging.info(f"User: {current_user.username} | Action: Logged Out")
         logout_user()
         session.clear()
         return redirect(url_for('login'))
@@ -118,36 +204,26 @@ def register_auth_routes(app):
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if not current_user.is_authenticated or current_user.role != 'admin': abort(403)
-
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
             role = request.form.get('role')
             department = request.form.get('department', None)
-
             db = get_database(USER_DATABASE)
-            existing = db.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()
-
-            if existing:
-                return render_template('register.html', error="Username taken.")
-
             try:
                 db.execute('INSERT INTO users (username, user_password, user_role, department) VALUES (?, ?, ?, ?)', (username, password, role, department))
                 db.commit()
                 TEMP_NEW_USERS.append({'username': username, 'time': datetime.now()})
                 logging.info(f"User: {current_user.username} | Action: Created New User '{username}' ({role})")
                 return redirect(url_for('manage_users'))
-            except Exception:
-                return render_template('register.html', error="Registration failed.")
-
+            except: return render_template('register.html', error="Registration failed.")
         return render_template('register.html')
 
     # --- 4. DASHBOARD ---
     @app.route('/dashboard')
     @login_required
     def dashboard():
-        if current_user.role != 'admin':
-            return redirect(url_for('home'))
+        if current_user.role != 'admin': return redirect(url_for('home'))
 
         db = get_database(USER_DATABASE)
         all_users = db.execute('SELECT * FROM users').fetchall()
@@ -158,25 +234,26 @@ def register_auth_routes(app):
         new_user_count = 0
         now = datetime.now()
         for user in TEMP_NEW_USERS:
-            if now - user['time'] < timedelta(seconds=30):
-                new_user_count += 1
+            if now - user['time'] < timedelta(seconds=30): new_user_count += 1
         
         stats = { 'total': total_count, 'active': active_count, 'suspended': deleted_count, 'new': new_user_count }
         pie_data = [['Status', 'Count'], ['Active', stats['active']], ['Deleted', stats['suspended']], ['New', stats['new']]]
-        line_data = [
-            ['Timeline', 'New Users', 'Active Users'], 
-            ['Session Start', 0, max(0, active_count - new_user_count - 1)], 
-            ['Pre-Demo', 0, max(0, active_count - 1)], 
-            ['LIVE NOW', new_user_count, active_count]
-        ]
+        line_data = [['Timeline', 'New Users', 'Active Users'], ['Session Start', 0, max(0, active_count - new_user_count - 1)], ['Pre-Demo', 0, max(0, active_count - 1)], ['LIVE NOW', new_user_count, active_count]]
         
-        # Read current broadcast for dashboard display
         current_broadcast = ""
         if os.path.exists('broadcast.txt'):
-             with open('broadcast.txt', 'r') as f:
-                current_broadcast = f.read().strip()
+             with open('broadcast.txt', 'r') as f: current_broadcast = f.read().strip()
+        
+        # Check maintenance status for dashboard badge
+        maintenance_active = False
+        if os.path.exists(MAINTENANCE_FILE):
+             with open(MAINTENANCE_FILE, 'r') as f:
+                try: 
+                    conf = json.load(f)
+                    if conf.get('active'): maintenance_active = True
+                except: pass
 
-        return render_template('dashboard.html', stats=stats, pie_data=pie_data, line_data=line_data, current_broadcast=current_broadcast)
+        return render_template('dashboard.html', stats=stats, pie_data=pie_data, line_data=line_data, current_broadcast=current_broadcast, maintenance_active=maintenance_active)
 
     # --- 5. MANAGE USERS ---
     @app.route('/manage-users')
@@ -199,7 +276,6 @@ def register_auth_routes(app):
             department = request.form.get('department')
             db.execute('UPDATE users SET username = ?, user_role = ?, department = ? WHERE id = ?', (username, role, department, user_id))
             db.commit()
-            logging.info(f"User: {current_user.username} | Action: Edited User ID {user_id}")
             return redirect(url_for('manage_users'))
         user_row = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         return render_template('edit-user.html', user=user_row)
@@ -236,9 +312,7 @@ def register_auth_routes(app):
             with open(log_path, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
-                    if "Action:" in line or "Starting Flask" in line:
-                        filtered_logs.append(line)
+                    if "Action:" in line or "Starting Flask" in line: filtered_logs.append(line)
                 filtered_logs.reverse()
-        else:
-            filtered_logs = ["Log file not found."]
+        else: filtered_logs = ["Log file not found."]
         return render_template('logs.html', logs=filtered_logs)
