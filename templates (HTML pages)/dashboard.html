@@ -2,6 +2,9 @@
 
 {% block content %}
 <div class="container mt-4">
+    
+    <h2 class="mb-4">Dashboard Overview</h2>
+
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card text-white bg-primary mb-3 shadow-sm h-100">
@@ -37,17 +40,17 @@
         </div>
     </div>
 
-    <div class="card shadow-sm mb-4 border-danger">
-        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+    <div class="card shadow-sm mb-4 border-secondary">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             <span><i class="bi bi-megaphone-fill me-2"></i> System Broadcast</span>
             <small>Send an alert to all users</small>
         </div>
         <div class="card-body bg-light">
             <form action="{{ url_for('post_broadcast') }}" method="POST" class="d-flex gap-2">
                 <input type="text" name="message" class="form-control" 
-                       placeholder="Type announcement here (e.g., 'System maintenance at 5 PM')..." 
+                       placeholder="Type announcement here..." 
                        value="{{ current_broadcast }}" required>
-                <button type="submit" class="btn btn-danger fw-bold">Post Alert</button>
+                <button type="submit" class="btn btn-secondary fw-bold">Post Alert</button>
                 <button type="submit" name="message" value="" class="btn btn-outline-secondary">Clear</button>
             </form>
         </div>
@@ -62,7 +65,7 @@
         </div>
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white"><h5 class="mb-0">User Growth History</h5></div>
+                <div class="card-header bg-white"><h5 class="mb-0">Live Session Activity</h5></div>
                 <div class="card-body"><div id="linechart_material" style="width: 100%; height: 300px;"></div></div>
             </div>
         </div>
@@ -89,7 +92,7 @@
   function drawLineChart() {
     var data = google.visualization.arrayToDataTable({{ line_data | tojson }});
     var options = { 
-        chart: { title: 'Live Session Activity', subtitle: 'Real-time Active Users tracking' }, 
+        chart: { title: 'User Activity', subtitle: 'Real-time Active Users tracking' }, 
         height: 300, 
         backgroundColor: 'transparent',
         hAxis: { showTextEvery: 1 }
