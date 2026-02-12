@@ -16,9 +16,3 @@ def register_routes(app):
 
     # Register authentication routes (login/register)
     register_auth_routes(app)
-
-    # Homepage screen
-    @app.route('/home')
-    def home():
-        # sends the user to the homepage
-        return render_template('homepage.html')

@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Apex Legend{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="container d-flex flex-column justify-content-center align-items-center text-white text-center" style="height: 80vh;">
+<div class="container d-flex flex-column justify-content-center align-items-center text-white" style="height: 70vh;">
     
-    <h1 class="display-3 fw-bold mb-3">Welcome to Apex Legend App</h1>
-    <p class="lead mb-4">This is the homepage of our application.</p>
+    {% if broadcast_msg %}
+    <div class="alert alert-danger shadow-lg d-flex align-items-center mb-5 w-75 animate-alert" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+        <div>
+            <h4 class="alert-heading fw-bold mb-1">Admin Announcement</h4>
+            <p class="mb-0 fs-5">{{ broadcast_msg }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <h1 class="display-1 fw-bold text-primary text-white">Hello, {{ current_user.username }}!</h1>
+    
+    <p>Welcome to the standard user area.</p>
+    <p>You do not have access to the Admin Dashboard.</p>
 
 </div>
 {% endblock %}

@@ -1,14 +1,68 @@
 #      -----      {{{     IMPORTS     }}}      -----      #
 
+import logging
+import os
+from datetime import datetime, timedelta 
 from flask import abort, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from database_helpers import get_database, USER_DATABASE
 from models import User
 
+#      -----      {{{     GLOBAL MEMORY (For Demo)     }}}      -----      #
+TEMP_NEW_USERS = [] 
+
+# Helper function to handle the Deleted Count File
+def get_deleted_count():
+    if not os.path.exists('deleted_count.txt'):
+        return 0
+    with open('deleted_count.txt', 'r') as f:
+        try:
+            return int(f.read().strip())
+        except ValueError:
+            return 0
+
+def increment_deleted_count():
+    current = get_deleted_count()
+    new_count = current + 1
+    with open('deleted_count.txt', 'w') as f:
+        f.write(str(new_count))
+    return new_count
+
 #      -----      {{{     AUTH ROUTES     }}}      -----      #
 
 def register_auth_routes(app):
-    """Register authentication routes (login/register/dashboard/CRUD) with the Flask app."""
+    """Register authentication routes."""
+
+    # --- 0. HOME ROUTE (Updated to Read Broadcast) ---
+    @app.route('/')
+    @app.route('/home')
+    def home():
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        
+        # READ BROADCAST MESSAGE
+        broadcast_msg = None
+        if os.path.exists('broadcast.txt'):
+            with open('broadcast.txt', 'r') as f:
+                content = f.read().strip()
+                if content: # Only show if not empty
+                    broadcast_msg = content
+
+        return render_template('homepage.html', broadcast_msg=broadcast_msg)
+
+    # --- 10. BROADCAST SYSTEM (New Feature) ---
+    @app.route('/post_broadcast', methods=['POST'])
+    @login_required
+    def post_broadcast():
+        if current_user.role != 'admin': abort(403)
+        
+        message = request.form.get('message')
+        
+        # Save message to a text file
+        with open('broadcast.txt', 'w') as f:
+            f.write(message)
+            
+        return redirect(url_for('dashboard'))
 
     # --- 1. LOGIN ---
     @app.route('/login', methods=['GET', 'POST'])
@@ -30,7 +84,6 @@ def register_auth_routes(app):
                 user_data = curr.fetchone()
 
                 if user_data:
-                    # Create User Object
                     user_obj = User(
                         id=user_data['id'],
                         username=user_data['username'],
@@ -38,13 +91,14 @@ def register_auth_routes(app):
                         department=user_data['department']
                     )
                     login_user(user_obj)
-                    
-                    # Store session data for Settings/Dashboard
                     session['user'] = user_obj.username
                     session['role'] = user_obj.role
+                    logging.info(f"User: {user_obj.username} | Role: {user_obj.role} | Action: Logged In")
                     
-                    # Redirect to Dashboard after login
-                    return redirect(url_for('dashboard')) 
+                    if user_obj.role == 'admin':
+                        return redirect(url_for('dashboard'))
+                    else:
+                        return redirect(url_for('home'))
                 else:
                     error = 'Invalid username or password.'
 
@@ -53,6 +107,9 @@ def register_auth_routes(app):
     # --- 2. LOGOUT ---
     @app.route('/logout')
     def logout():
+        user_name = current_user.username if current_user.is_authenticated else "Unknown"
+        if user_name != "Unknown":
+            logging.info(f"User: {user_name} | Action: Logged Out")
         logout_user()
         session.clear()
         return redirect(url_for('login'))
@@ -60,9 +117,7 @@ def register_auth_routes(app):
     # --- 3. REGISTER ---
     @app.route('/register', methods=['GET', 'POST'])
     def register():
-        # Only Admins can register new users
-        if not current_user.is_authenticated or current_user.role != 'admin':
-            abort(403)
+        if not current_user.is_authenticated or current_user.role != 'admin': abort(403)
 
         if request.method == 'POST':
             username = request.form.get('username')
@@ -77,11 +132,10 @@ def register_auth_routes(app):
                 return render_template('register.html', error="Username taken.")
 
             try:
-                db.execute(
-                    'INSERT INTO users (username, user_password, user_role, department) VALUES (?, ?, ?, ?)',
-                    (username, password, role, department)
-                )
+                db.execute('INSERT INTO users (username, user_password, user_role, department) VALUES (?, ?, ?, ?)', (username, password, role, department))
                 db.commit()
+                TEMP_NEW_USERS.append({'username': username, 'time': datetime.now()})
+                logging.info(f"User: {current_user.username} | Action: Created New User '{username}' ({role})")
                 return redirect(url_for('manage_users'))
             except Exception:
                 return render_template('register.html', error="Registration failed.")
@@ -92,30 +146,37 @@ def register_auth_routes(app):
     @app.route('/dashboard')
     @login_required
     def dashboard():
-        # Mock Data for Charts
-        stats = { 'total': 1400, 'active': 1233, 'suspended': 145, 'new': 22 }
+        if current_user.role != 'admin':
+            return redirect(url_for('home'))
 
-        pie_data = [
-            ['Status', 'Count'],
-            ['Active', stats['active']],
-            ['Suspended', stats['suspended']],
-            ['New', stats['new']]
-        ]
-
+        db = get_database(USER_DATABASE)
+        all_users = db.execute('SELECT * FROM users').fetchall()
+        active_count = len(all_users)
+        deleted_count = get_deleted_count()
+        total_count = active_count + deleted_count
+        
+        new_user_count = 0
+        now = datetime.now()
+        for user in TEMP_NEW_USERS:
+            if now - user['time'] < timedelta(seconds=30):
+                new_user_count += 1
+        
+        stats = { 'total': total_count, 'active': active_count, 'suspended': deleted_count, 'new': new_user_count }
+        pie_data = [['Status', 'Count'], ['Active', stats['active']], ['Deleted', stats['suspended']], ['New', stats['new']]]
         line_data = [
-            ['Month', 'New Users', 'Total Users'],
-            ['Jan',  50,       400],
-            ['Feb',  80,       480],
-            ['Mar',  100,      580],
-            ['Apr',  150,      730],
-            ['May',  200,      930],
-            ['Jun',  250,      1180]
+            ['Timeline', 'New Users', 'Active Users'], 
+            ['Session Start', 0, max(0, active_count - new_user_count - 1)], 
+            ['Pre-Demo', 0, max(0, active_count - 1)], 
+            ['LIVE NOW', new_user_count, active_count]
         ]
+        
+        # Read current broadcast for dashboard display
+        current_broadcast = ""
+        if os.path.exists('broadcast.txt'):
+             with open('broadcast.txt', 'r') as f:
+                current_broadcast = f.read().strip()
 
-        return render_template('dashboard.html', 
-                               stats=stats, 
-                               pie_data=pie_data, 
-                               line_data=line_data)
+        return render_template('dashboard.html', stats=stats, pie_data=pie_data, line_data=line_data, current_broadcast=current_broadcast)
 
     # --- 5. MANAGE USERS ---
     @app.route('/manage-users')
@@ -132,17 +193,14 @@ def register_auth_routes(app):
     def edit_user(user_id):
         if current_user.role != 'admin': abort(403)
         db = get_database(USER_DATABASE)
-
         if request.method == 'POST':
             username = request.form.get('username')
             role = request.form.get('role')
             department = request.form.get('department')
-            
-            db.execute('UPDATE users SET username = ?, user_role = ?, department = ? WHERE id = ?', 
-                       (username, role, department, user_id))
+            db.execute('UPDATE users SET username = ?, user_role = ?, department = ? WHERE id = ?', (username, role, department, user_id))
             db.commit()
+            logging.info(f"User: {current_user.username} | Action: Edited User ID {user_id}")
             return redirect(url_for('manage_users'))
-
         user_row = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         return render_template('edit-user.html', user=user_row)
 
@@ -152,12 +210,12 @@ def register_auth_routes(app):
     def delete_user(user_id):
         if current_user.role != 'admin': abort(403)
         db = get_database(USER_DATABASE)
-        
         if request.method == 'POST':
+            increment_deleted_count()
             db.execute('DELETE FROM users WHERE id = ?', (user_id,))
             db.commit()
+            logging.info(f"User: {current_user.username} | Action: Deleted User ID {user_id}")
             return redirect(url_for('manage_users'))
-
         user_row = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         return render_template('delete-user.html', user=user_row)
 
@@ -166,3 +224,21 @@ def register_auth_routes(app):
     @login_required
     def settings():
         return render_template('settings.html')
+
+    # --- 9. LOGS ---
+    @app.route('/logs')
+    @login_required
+    def logs():
+        if current_user.role != 'admin': abort(403)
+        log_path = 'Logs/app_activity.txt'
+        filtered_logs = []
+        if os.path.exists(log_path):
+            with open(log_path, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    if "Action:" in line or "Starting Flask" in line:
+                        filtered_logs.append(line)
+                filtered_logs.reverse()
+        else:
+            filtered_logs = ["Log file not found."]
+        return render_template('logs.html', logs=filtered_logs)

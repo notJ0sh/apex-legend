@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}System Logs{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h3 class="mb-3 text-white">System Activity Logs</h3>
+    
+    <div class="card shadow-lg">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-terminal-fill me-2"></i>app_activity.txt</span>
+            <span class="badge bg-secondary">Live View</span>
+        </div>
+        
+        <div class="card-body bg-black p-0">
+            <div class="log-viewer p-3" style="height: 70vh; overflow-y: auto; font-family: 'Courier New', monospace;">
+                {% if logs %}
+                    {% for line in logs %}
+                        <div class="log-line text-success border-bottom border-secondary py-1">
+                            {% if 'ERROR' in line %}
+                                <span class="text-danger">{{ line }}</span>
+                            {% elif 'WARNING' in line %}
+                                <span class="text-warning">{{ line }}</span>
+                            {% else %}
+                                <span class="text-success">{{ line }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-muted">No logs available.</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing most recent activity first.
+        </div>
+    </div>
+</div>
+{% endblock %}
