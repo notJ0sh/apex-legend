@@ -2,7 +2,8 @@
 
 import logging
 import os
-import json  # <--- Crucial for the new feature
+import json
+import re  # <--- Regex module
 from datetime import datetime, timedelta 
 from flask import abort, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
@@ -26,7 +27,7 @@ def increment_deleted_count():
     with open('deleted_count.txt', 'w') as f: f.write(str(new_count))
     return new_count
 
-# --- NEW: SMART MAINTENANCE CHECK ---
+# --- SMART MAINTENANCE CHECK ---
 def check_maintenance_lock(user_obj=None):
     if not os.path.exists(MAINTENANCE_FILE):
         return False, None
@@ -40,22 +41,17 @@ def check_maintenance_lock(user_obj=None):
     if not config.get('active', False):
         return False, None
 
-    # Admins are ALWAYS allowed
     if user_obj and user_obj.role == 'admin':
         return False, None
 
     duration = config.get('duration', 'Unknown')
     
-    # 1. Global Lock?
     if 'ALL_DEPARTMENTS' in config.get('departments', []):
         return True, duration
 
     if user_obj:
-        # 2. Department Lock?
         if user_obj.department and user_obj.department in config.get('departments', []):
             return True, duration
-        
-        # 3. Specific User Lock?
         if user_obj.username in config.get('users', []):
             return True, duration
 
@@ -73,7 +69,6 @@ def register_auth_routes(app):
         if not current_user.is_authenticated:
             return redirect(url_for('login'))
         
-        # Check Maintenance
         is_blocked, duration = check_maintenance_lock(current_user)
         if is_blocked:
             logout_user()
@@ -87,8 +82,7 @@ def register_auth_routes(app):
 
         return render_template('homepage.html', broadcast_msg=broadcast_msg)
 
-    # --- 11. PREPARE MAINTENANCE (Password Check) ---
-    # This is the specific route your error said was missing!
+    # --- 11. PREPARE MAINTENANCE ---
     @app.route('/prepare_maintenance', methods=['POST'])
     @login_required
     def prepare_maintenance():
@@ -96,39 +90,25 @@ def register_auth_routes(app):
         
         password = request.form.get('password')
         if password == "12345":
-            # Password Good! Get data for the setup page
             db = get_database(USER_DATABASE)
             users = db.execute('SELECT username, user_role FROM users').fetchall()
-            
-            # Get unique departments
             all_users = db.execute('SELECT DISTINCT department FROM users').fetchall()
             departments = [row['department'] for row in all_users if row['department']]
-            
             return render_template('maintenance_setup.html', users=users, departments=departments)
         else:
             flash("Wrong Admin Password!", "danger")
             return redirect(url_for('dashboard'))
 
-    # --- 12. CONFIRM MAINTENANCE (Save Rules) ---
+    # --- 12. CONFIRM MAINTENANCE ---
     @app.route('/confirm_maintenance', methods=['POST'])
     @login_required
     def confirm_maintenance():
         if current_user.role != 'admin': abort(403)
-        
         duration = request.form.get('duration')
         target_depts = request.form.getlist('departments')
         target_users = request.form.getlist('users')
-        
-        config = {
-            "active": True,
-            "duration": duration,
-            "departments": target_depts,
-            "users": target_users
-        }
-        
-        with open(MAINTENANCE_FILE, 'w') as f:
-            json.dump(config, f)
-            
+        config = { "active": True, "duration": duration, "departments": target_depts, "users": target_users }
+        with open(MAINTENANCE_FILE, 'w') as f: json.dump(config, f)
         flash("Maintenance Mode Activated!", "warning")
         return redirect(url_for('dashboard'))
 
@@ -137,10 +117,7 @@ def register_auth_routes(app):
     @login_required
     def disable_maintenance():
         if current_user.role != 'admin': abort(403)
-        
-        if os.path.exists(MAINTENANCE_FILE):
-            os.remove(MAINTENANCE_FILE)
-            
+        if os.path.exists(MAINTENANCE_FILE): os.remove(MAINTENANCE_FILE)
         flash("Maintenance Mode Disabled.", "success")
         return redirect(url_for('dashboard'))
 
@@ -173,11 +150,8 @@ def register_auth_routes(app):
                     role = user_data['user_role']
                     temp_user = User(id=user_data['id'], username=user_data['username'], user_role=role, department=user_data['department'])
                     
-                    # --- SECURITY CHECK: SMART LOCK ---
                     is_blocked, duration = check_maintenance_lock(temp_user)
-                    if is_blocked:
-                        return render_template('maintenance.html', duration=duration)
-                    # ----------------------------------
+                    if is_blocked: return render_template('maintenance.html', duration=duration)
 
                     login_user(temp_user)
                     session['user'] = temp_user.username
@@ -200,15 +174,28 @@ def register_auth_routes(app):
         session.clear()
         return redirect(url_for('login'))
 
-    # --- 3. REGISTER ---
+    # --- 3. REGISTER (Fixed with Debugging) ---
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if not current_user.is_authenticated or current_user.role != 'admin': abort(403)
+        
         if request.method == 'POST':
-            username = request.form.get('username')
+            username = request.form.get('username', '').strip() # .strip() removes accidental spaces
             password = request.form.get('password')
             role = request.form.get('role')
             department = request.form.get('department', None)
+            
+            # --- DEBUGGING PRINT ---
+            print(f"DEBUG: Trying to register username: '{username}'")
+
+            # --- VALIDATION CHECK ---
+            if not re.match(r'^[a-zA-Z ]+$', username):
+                print("DEBUG: >> REGEX FAILED. Name contains invalid characters.")
+                return render_template('register.html', error="Invalid Name: Use letters only (No numbers/symbols).")
+            else:
+                print("DEBUG: >> REGEX PASSED. Name is good.")
+            # ------------------------
+
             db = get_database(USER_DATABASE)
             try:
                 db.execute('INSERT INTO users (username, user_password, user_role, department) VALUES (?, ?, ?, ?)', (username, password, role, department))
@@ -216,7 +203,10 @@ def register_auth_routes(app):
                 TEMP_NEW_USERS.append({'username': username, 'time': datetime.now()})
                 logging.info(f"User: {current_user.username} | Action: Created New User '{username}' ({role})")
                 return redirect(url_for('manage_users'))
-            except: return render_template('register.html', error="Registration failed.")
+            except Exception as e:
+                print(f"DEBUG: Database Error: {e}") 
+                return render_template('register.html', error="Registration failed (Name might be taken).")
+        
         return render_template('register.html')
 
     # --- 4. DASHBOARD ---
@@ -244,7 +234,6 @@ def register_auth_routes(app):
         if os.path.exists('broadcast.txt'):
              with open('broadcast.txt', 'r') as f: current_broadcast = f.read().strip()
         
-        # Check maintenance status for dashboard badge
         maintenance_active = False
         if os.path.exists(MAINTENANCE_FILE):
              with open(MAINTENANCE_FILE, 'r') as f:
