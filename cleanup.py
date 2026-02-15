@@ -20,7 +20,7 @@ def cleanup():
             print(f"Removed: {file}")
 
     # Remove all files from specific folders
-    folders_to_clean = ['Logs']
+    folders_to_clean = ['Logs', 'downloads']
     for folder in folders_to_clean:
         if os.path.exists(folder):
             for filename in os.listdir(folder):

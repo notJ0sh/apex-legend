@@ -2,14 +2,21 @@
 
 import sqlite3
 import os
-from flask import g, Flask
+from flask import g, Flask, Response, send_from_directory
 from models import File
 import requests
+
+from log_handler import log_db_entry
 
 #      -----      {{{     DATABASE CONSTANTS     }}}      -----      #
 
 USER_DATABASE = 'user_data.db'
 FILES_DATABASE = 'files_data.db'
+
+
+#      -----      {{{     DIRECTORY CONSTANTS     }}}      -----      #
+
+UPLOAD_DIRECTORY = 'downloads'
 
 
 #      -----      {{{     DATABASE HELPERS     }}}      -----      #
@@ -96,6 +103,9 @@ def add_data(db_name: str, table: str, data: dict) -> None:
         # Only close if we created the connection outside Flask context
         if should_close:
             database.close()
+
+        # Log the information and success
+        log_db_entry(data=data)
 
 
 # Download file from URL to destination path.
@@ -191,3 +201,52 @@ def get_files_by_department(department_name: str) -> list[File]:
     ).fetchall()
 
     return [File.from_row(row) for row in cursor]
+
+
+# Check file exists by file name
+def check_file_exists(filename: str) -> bool:
+    return os.path.exists(os.path.join(UPLOAD_DIRECTORY, filename))
+
+
+# Retrieve download file by file name and returns success status
+
+
+def get_file_download(filename: str) -> Response:
+    # Check if file exists
+    if not check_file_exists(filename=filename):
+        return Response("File not found.", status=404)
+
+    return send_from_directory(
+        UPLOAD_DIRECTORY,
+        filename,
+        as_attachment=True
+    )
+
+
+'''
+example usage:
+
+PYTHON:
+@app.route('/download/<filename>')
+def download_route(filename):
+    # Call your function
+    response =get_file_download(filename)
+    
+    # already contains the "File not found" message and 404 status.
+    return response
+    
+
+HTML: (basically its a href thingy)
+<h3>Available Files</h3>
+<ul>
+    {% for file in files %}
+    <li>
+        {{ file }} 
+        <a href="{{ url_for('download_route', filename=file) }}">
+            Download
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+    
+'''
