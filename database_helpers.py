@@ -250,3 +250,12 @@ HTML: (basically its a href thingy)
 </ul>
     
 '''
+
+
+def get_channel_stats(department_name: str):
+    """Retrieve statistics for a specific department for the Discord report."""
+    db = get_database(FILES_DATABASE)
+    return db.execute(
+        'SELECT file_type, COUNT(*) as count FROM files WHERE department = ? GROUP BY file_type',
+        (department_name.upper(),)
+    ).fetchall()
