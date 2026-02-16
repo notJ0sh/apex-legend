@@ -116,8 +116,15 @@ def register_routes(app):
         ).fetchall()
         departments = [dept[0] for dept in departments if dept[0]]
         
-        # Get selected department from query parameter
+        # Get all unique file types for filter dropdown
+        file_types_query = db.execute(
+            'SELECT DISTINCT file_type FROM files ORDER BY file_type'
+        ).fetchall()
+        file_types = [ft[0] for ft in file_types_query if ft[0]]
+        
+        # Get selected filters from query parameters
         selected_dept = request.args.get('department', 'all')
+        selected_file_type = request.args.get('file_type', 'all')
         search_query = request.args.get('search', '').strip()
 
         #Build queries based on filters
@@ -128,6 +135,10 @@ def register_routes(app):
         if selected_dept and selected_dept != 'all':
             conditions.append('department = ?')
             params.append(selected_dept)
+
+        if selected_file_type and selected_file_type != 'all':
+            conditions.append('LOWER(file_type) = LOWER(?)')
+            params.append(selected_file_type)
 
         if search_query:
             conditions.append('file_name LIKE ?')
@@ -145,7 +156,9 @@ def register_routes(app):
         return render_template('files.html',
                             files=files_list,
                             departments=departments,
+                            file_types=file_types,
                             selected_dept=selected_dept,
+                            selected_file_type=selected_file_type,
                             search_query=search_query,
                             get_file_icon=get_file_icon,
                             format_datetime=format_datetime)

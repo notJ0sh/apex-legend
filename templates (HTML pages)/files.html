@@ -6,26 +6,20 @@
 <div class="files-container">
     <h2>File Repository</h2>
 
-    <!-- Search and Filter Section - LEFT ALIGNED -->
+    <!-- Search and Filter Section - ALL IN ONE ROW -->
     <div class="filter-section">
         <div class="filter-row">
-            <!-- Search Bar -->
+            <!-- Search Bar (50% width) -->
             <div class="search-container">
-                <form method="GET" action="{{ url_for('files') }}" class="search-form">
-                    <input type="text" name="search" placeholder="Search by file name..." value="{{ search_query }}"
-                        class="search-input">
-                    <button type="submit" class="search-btn">🔍 Search</button>
-                    {% if search_query %}
-                    <a href="{{ url_for('files') }}{% if selected_dept and selected_dept != 'all' %}?department={{ selected_dept }}{% endif %}"
-                        class="clear-search">Clear</a>
-                    {% endif %}
-                </form>
+                <input type="text" id="search-input" placeholder="Search by file name..." value="{{ search_query }}"
+                    class="search-input">
+                <button type="button" onclick="applyFilters()" class="search-btn">🔍 Search</button>
             </div>
 
-            <!-- Department Filter -->
-            <div class="department-filter-container">
-                <label for="department-filter">Filter by Department:</label>
-                <select id="department-filter" onchange="filterFiles()">
+            <!-- Department Filter (~20% width) -->
+            <div class="filter-container">
+                <label for="department-filter">Department:</label>
+                <select id="department-filter" onchange="applyFilters()">
                     <option value="all">All Departments</option>
                     {% for dept in departments %}
                     <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>
@@ -33,7 +27,24 @@
                     </option>
                     {% endfor %}
                 </select>
-                <button onclick="resetFilter()" class="reset-btn">Reset Filter</button>
+            </div>
+
+            <!-- File Type Filter (~20% width) -->
+            <div class="filter-container">
+                <label for="file-type-filter">File Type:</label>
+                <select id="file-type-filter" onchange="applyFilters()">
+                    <option value="all">All Types</option>
+                    {% for type in file_types %}
+                    <option value="{{ type }}" {% if selected_file_type==type %}selected{% endif %}>
+                        {{ type|upper }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Reset Filter Button (~10% width) -->
+            <div class="reset-filter-container">
+                <button onclick="resetAllFilters()" class="reset-btn">Reset Filters</button>
             </div>
         </div>
     </div>
@@ -94,18 +105,18 @@
                     <div class="card-actions">
                         <a href="{{ url_for('download_file', filename=file.file_name) }}" class="download-btn"
                             title="Download {{ file.file_name }}">
-                            📥 Download
+                            Download
                         </a>
                         <!-- Only show Edit and Delete buttons for admin users -->
                         {% if current_user.role == 'admin' %}
                         <a href="{{ url_for('edit_file', file_id=file.id) }}" class="edit-btn"
                             title="Edit {{ file.file_name }}">
-                            ✏️ Edit
+                            Edit
                         </a>
                         <a href="{{ url_for('delete_file', file_id=file.id) }}" class="delete-btn"
                             title="Delete {{ file.file_name }}"
                             onclick="return confirmDelete('{{ file.file_name }}', event)">
-                            🗑️ Delete
+                            Delete
                         </a>
                         {% endif %}
                     </div>
@@ -121,10 +132,16 @@
                 {% if selected_dept and selected_dept != 'all' %}
                 in department: {{ selected_dept }}
                 {% endif %}
+                {% if selected_file_type and selected_file_type != 'all' %}
+                of type: {{ selected_file_type|upper }}
+                {% endif %}
                 {% else %}
                 No files found
                 {% if selected_dept and selected_dept != 'all' %}
                 for department: {{ selected_dept }}
+                {% endif %}
+                {% if selected_file_type and selected_file_type != 'all' %}
+                of type: {{ selected_file_type|upper }}
                 {% endif %}
                 {% endif %}
             </p>
@@ -142,21 +159,32 @@
             {% if selected_dept and selected_dept != 'all' %}
             in <strong>{{ selected_dept }}</strong> department
             {% endif %}
+            {% if selected_file_type and selected_file_type != 'all' %}
+            of type <strong>{{ selected_file_type|upper }}</strong>
+            {% endif %}
         </p>
     </div>
 </div>
 
 <script>
-    function filterFiles() {
-        const select = document.getElementById('department-filter');
-        const selectedDept = select.value;
-        const searchQuery = "{{ search_query }}";
+    function applyFilters() {
+        const deptSelect = document.getElementById('department-filter');
+        const fileTypeSelect = document.getElementById('file-type-filter');
+        const searchInput = document.getElementById('search-input');
+
+        const selectedDept = deptSelect.value;
+        const selectedFileType = fileTypeSelect.value;
+        const searchQuery = searchInput.value.trim();
 
         let url = "{{ url_for('files') }}";
         let params = [];
 
         if (selectedDept !== 'all') {
             params.push(`department=${encodeURIComponent(selectedDept)}`);
+        }
+
+        if (selectedFileType !== 'all') {
+            params.push(`file_type=${encodeURIComponent(selectedFileType)}`);
         }
 
         if (searchQuery) {
@@ -170,15 +198,9 @@
         window.location.href = url;
     }
 
-    function resetFilter() {
-        const searchQuery = "{{ search_query }}";
-        let url = "{{ url_for('files') }}";
-
-        if (searchQuery) {
-            url += '?search=' + encodeURIComponent(searchQuery);
-        }
-
-        window.location.href = url;
+    function resetAllFilters() {
+        // Simply redirect to files page with no parameters - resets everything
+        window.location.href = "{{ url_for('files') }}";
     }
 
     function confirmDelete(fileName, event) {
@@ -231,24 +253,21 @@
         padding: 25px;
         margin-bottom: 30px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+    }   
 
     .filter-row {
         display: flex;
-        gap: 20px;
+        gap: 15px;
         align-items: flex-end;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
+    /* Search Container - 50% of the row */
     .search-container {
-        flex: 2;
-        min-width: 300px;
-    }
-
-    .search-form {
+        flex: 0 0 calc(50% - 7.5px);
         display: flex;
         gap: 10px;
-        align-items: center;
+        align-items: flex-end;
     }
 
     .search-input {
@@ -267,7 +286,7 @@
     }
 
     .search-btn {
-        padding: 12px 24px;
+        padding: 12px 20px;
         background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
         color: white;
         border: none;
@@ -276,6 +295,7 @@
         cursor: pointer;
         transition: all 0.3s ease;
         white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .search-btn:hover {
@@ -284,38 +304,22 @@
         box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
     }
 
-    .clear-search {
-        padding: 12px 20px;
-        background-color: #6c757d;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .clear-search:hover {
-        background-color: #545b62;
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .department-filter-container {
-        flex: 1;
-        min-width: 250px;
+    /* Filter Containers - Department and File Type - Each 20% */
+    .filter-container {
+        flex: 0 0 calc(20% - 7.5px);
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-    .department-filter-container label {
+    .filter-container label {
         font-weight: 600;
         color: #495057;
         font-size: 14px;
+        white-space: nowrap;
     }
 
-    .department-filter-container select {
+    .filter-container select {
         padding: 12px;
         border: 2px solid #dee2e6;
         border-radius: 8px;
@@ -323,29 +327,40 @@
         background-color: white;
         cursor: pointer;
         transition: all 0.3s ease;
+        width: 100%;
     }
 
-    .department-filter-container select:focus {
+    .filter-container select:focus {
         outline: none;
         border-color: #0d6efd;
         box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
     }
 
+    /* Reset Button Container - 10% */
+    .reset-filter-container {
+        flex: 0 0 calc(10% - 7.5px);
+        display: flex;
+        align-items: flex-end;
+    }
+
     .reset-btn {
-        padding: 12px 20px;
-        background-color: #6c757d;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #98202c);
         color: white;
         border: none;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 8px;
+        white-space: nowrap;
+        width: 100%;
+        text-align: center;
     }
 
     .reset-btn:hover {
-        background-color: #545b62;
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     }
 
     /* Files Cards Grid */
@@ -376,7 +391,7 @@
 
     /* Card Header */
     .file-card .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #4a4d50;
         padding: 20px;
         display: flex;
         align-items: center;
@@ -467,32 +482,27 @@
     }
 
     .department-hr {
-        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-        color: #d63031;
+        background: #fdcb6e;
+        color: black;
     }
 
     .department-it {
-        background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        background: #2177e0;
         color: white;
     }
 
     .department-finance {
-        background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
-        color: #2d3436;
+        background: #0c4919;
+        color: white;
     }
 
     .department-logistics {
-        background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        background: #771ccb;
         color: white;
     }
 
     .department-marketing {
-        background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%);
-        color: white;
-    }
-
-    .department-sales {
-        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        background:#a50707 ;
         color: white;
     }
 
@@ -505,12 +515,12 @@
     }
 
     .discord-badge {
-        background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
+        background: #7753a8;
         color: white;
     }
 
     .web-badge {
-        background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+        background: #2177e0 ;
         color: white;
     }
 
@@ -544,7 +554,7 @@
     }
 
     .download-btn {
-        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        background: #0e5c20;
         color: white;
     }
 
@@ -556,19 +566,19 @@
     }
 
     .edit-btn {
-        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        background: #daac25;
         color: #212529;
     }
 
     .edit-btn:hover {
-        background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+        background: linear-gradient(135deg, #FFDB58 0%, #fcd033 100%);
         color: #212529;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
     }
 
     .delete-btn {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: #98202c;
         color: white;
     }
 
@@ -612,6 +622,61 @@
     .files-stats strong {
         color: #0d6efd;
         font-weight: 700;
+    }
+
+    /* Responsive Design for Filters */
+    @media (max-width: 1200px) {
+        .filter-row {
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            flex: 1 1 100%;
+            min-width: 100%;
+        }
+
+        .filter-container {
+            flex: 1 1 calc(50% - 10px);
+            min-width: 150px;
+        }
+
+        .reset-filter-container {
+            flex: 1 1 100%;
+        }
+
+        .reset-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .filter-row {
+            gap: 12px;
+        }
+
+        .search-container {
+            flex: 1 1 100%;
+        }
+
+        .filter-container {
+            flex: 1 1 100%;
+        }
+
+        .reset-filter-container {
+            flex: 1 1 100%;
+        }
+
+        .search-input,
+        .search-btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .filter-container select,
+        .reset-btn {
+            padding: 10px;
+            font-size: 14px;
+        }
     }
 </style>
 {% endblock %}
