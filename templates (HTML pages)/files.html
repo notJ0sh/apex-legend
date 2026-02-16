@@ -1,10 +1,10 @@
-{% extends "reanne_base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Files - Apex Legend App{% endblock %}
 
 {% block content %}
-<div class="files-container" style="min-height: 100vh;background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%)">
-    <h2 style="color: white;">File Repository</h2>
+<div class="files-container">
+    <h2>File Repository</h2>
 
     <!-- Search and Filter Section - LEFT ALIGNED -->
     <div class="filter-section">
@@ -209,4 +209,409 @@
         return false;
     }
 </script>
+
+<style>
+    .files-container {
+        padding: 30px;
+        min-height: 100vh;
+    }
+
+    .files-container h2 {
+        color: white;
+        margin-bottom: 30px;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    /* Search and Filter Section */
+    .filter-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .search-container {
+        flex: 2;
+        min-width: 300px;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 18px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
+
+    .search-btn {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+
+    .clear-search {
+        padding: 12px 20px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .clear-search:hover {
+        background-color: #545b62;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .department-filter-container {
+        flex: 1;
+        min-width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .department-filter-container label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+    }
+
+    .department-filter-container select {
+        padding: 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 15px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .department-filter-container select:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
+
+    .reset-btn {
+        padding: 12px 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 8px;
+    }
+
+    .reset-btn:hover {
+        background-color: #545b62;
+        transform: translateY(-2px);
+    }
+
+    /* Files Cards Grid */
+    .files-cards-container {
+        margin-bottom: 30px;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .file-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Header */
+    .file-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .file-icon-large {
+        font-size: 48px;
+        line-height: 1;
+    }
+
+    .file-name-container {
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .file-name {
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .file-meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .file-type,
+    .file-date {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Card Body */
+    .file-card .card-body {
+        padding: 20px;
+        flex: 1;
+    }
+
+    .file-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .detail-value {
+        color: #495057;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    /* Department Badges */
+    .department-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .department-hr {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        color: #d63031;
+    }
+
+    .department-it {
+        background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        color: white;
+    }
+
+    .department-finance {
+        background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+        color: #2d3436;
+    }
+
+    .department-logistics {
+        background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        color: white;
+    }
+
+    .department-marketing {
+        background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%);
+        color: white;
+    }
+
+    .department-sales {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        color: white;
+    }
+
+    /* Source Badges */
+    .source-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .discord-badge {
+        background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
+        color: white;
+    }
+
+    .web-badge {
+        background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+        color: white;
+    }
+
+    /* Card Footer */
+    .file-card .card-footer {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+
+    .download-btn,
+    .edit-btn,
+    .delete-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .download-btn {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: white;
+    }
+
+    .download-btn:hover {
+        background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .edit-btn {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+
+    .edit-btn:hover {
+        background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+        color: #212529;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    /* No Files Message */
+    .no-files {
+        background: white;
+        border-radius: 12px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-files p {
+        color: #6c757d;
+        font-size: 18px;
+        margin: 0;
+    }
+
+    /* Files Statistics */
+    .files-stats {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .files-stats p {
+        color: #495057;
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .files-stats strong {
+        color: #0d6efd;
+        font-weight: 700;
+    }
+</style>
 {% endblock %}

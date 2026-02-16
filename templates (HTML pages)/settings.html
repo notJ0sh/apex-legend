@@ -1,6 +1,6 @@
-{% extends "reanne_base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Settings{% endblock %}
+{% block title %}Settings - Apex Legend App{% endblock %}
 
 {% block content %}
 <div class="settings-container">
@@ -259,4 +259,374 @@
         }
     }
 </script>
+
+<style>
+    .settings-container {
+        display: flex;
+        min-height: calc(100vh - 60px);
+        background-color: #f8f9fa;
+    }
+
+    /* Settings Left Sidebar */
+    .settings-sidebar {
+        width: 240px;
+        background-color: #2f3136;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .settings-sidebar .sidebar-header {
+        padding: 24px 20px 16px;
+        border-bottom: 1px solid #202225;
+    }
+
+    .settings-sidebar .sidebar-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;
+    }
+
+    .menu-item {
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        color: #b9bbbe;
+        font-weight: 500;
+    }
+
+    .menu-item:hover {
+        background-color: #34373c;
+        color: white;
+    }
+
+    .menu-item.active {
+        background-color: #40444b;
+        color: white;
+        border-left: 3px solid #5865f2;
+    }
+
+    .menu-item span {
+        font-size: 18px;
+    }
+
+    .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid #202225;
+        background-color: #292b2f;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: white;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-details strong {
+        color: white;
+        font-size: 14px;
+    }
+
+    .user-details span {
+        color: #b9bbbe;
+        font-size: 12px;
+    }
+
+    /* Settings Main Content */
+    .settings-main {
+        flex: 1;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* Settings Tabs */
+    .settings-tabs {
+        display: flex;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 0 24px;
+    }
+
+    .tab-btn {
+        padding: 16px 24px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-size: 16px;
+        font-weight: 500;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+        color: #495057;
+        border-bottom-color: #dee2e6;
+    }
+
+    .tab-btn.active {
+        color: #5865f2;
+        border-bottom-color: #5865f2;
+        background-color: white;
+    }
+
+    /* Settings Content Area */
+    .settings-content {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+    }
+
+    .content-tab {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .content-tab.active {
+        display: block;
+    }
+
+    .content-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .content-header h1 {
+        margin: 0 0 8px 0;
+        color: white;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .content-header p {
+        margin: 0;
+        color: white;
+        font-size: 16px;
+    }
+
+    /* Info Cards */
+    .info-card {
+        background-color: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card h3 {
+        margin: 0 0 20px 0;
+        color: #2f3136;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    /* Info Grid for Account Info */
+    .info-card .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-card .info-item {
+        padding: 12px 0;
+        background: none;
+        border: none;
+    }
+
+    .info-card .info-item label {
+        display: block;
+        margin-bottom: 6px;
+        color: #6c757d;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .info-card .info-value {
+        color: #2f3136;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .info-card .role-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background-color: #e7f1ff;
+        color: #5865f2;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    /* Form Styles for Settings */
+    .info-card .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-card .form-row .form-group {
+        flex: 1;
+    }
+
+    .info-card .form-group {
+        margin-bottom: 16px;
+    }
+
+    .info-card .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #495057;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .info-card .form-group input,
+    .info-card .form-group select,
+    .info-card .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background-color: white;
+    }
+
+    .info-card .form-group input:focus,
+    .info-card .form-group select:focus,
+    .info-card .form-group textarea:focus {
+        outline: none;
+        border-color: #5865f2;
+        box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+    }
+
+    .info-card .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-help {
+        margin: 6px 0 0 0;
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    /* Checkbox Styles */
+    .checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .checkbox-group.feedback-contact {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .feedback-label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        color: #495057;
+        font-size: 14px;
+        user-select: none;
+        font-weight: 500;
+    }
+
+    .feedback-helper-text {
+        margin: 0;
+        color: #6c757d;
+        font-size: 12px;
+        margin-left: 26px;
+        line-height: 1.4;
+    }
+
+    /* Status Info */
+    .status-info {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .status-info p {
+        margin: 10px 0;
+    }
+
+    /* Form Actions for Settings */
+    .info-card .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .info-card .btn-primary,
+    .info-card .btn-secondary {
+        padding: 12px 28px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+
+    .info-card .btn-primary {
+        background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+        color: white;
+    }
+
+    .info-card .btn-primary:hover {
+        background: linear-gradient(135deg, #4752c4 0%, #3c45a5 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+    }
+
+    .info-card .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        color: white;
+    }
+
+    .info-card .btn-secondary:hover {
+        background: linear-gradient(135deg, #545b62 0%, #3d4348 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+</style>
 {% endblock %}
