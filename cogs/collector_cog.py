@@ -6,13 +6,21 @@ from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 
-# THE FIX: Import the Flask app instance to provide application context
+# Import the Flask app instance to provide application context
 from app import app
 # Import the check and database helpers
 from .admin_checks import admin_only_check
 from database_helpers import add_data_from_discord, get_database, FILES_DATABASE
 
 load_dotenv()
+
+# SECURITY CONFIGURATION
+# Whitelist of accepted file extensions. Any file not in this list is rejected.
+ALLOWED_EXTENSIONS = {
+    '.pdf', '.xlsx', '.xls', '.csv', 
+    '.docx', '.doc', '.pptx', '.ppt', 
+    '.txt', '.png', '.jpg', '.jpeg', '.gif'
+}
 
 class CollectorCog(commands.Cog):
     """Collects files and links from Discord and provides data reporting."""
@@ -57,7 +65,7 @@ class CollectorCog(commands.Cog):
 
     def save_files_to_database(self, message: discord.Message, attachments_data: list[dict]):
         """Save file data with a check for duplicates to ensure data integrity."""
-        # THE FIX: Wrap database access in the app context for background threads
+        # Wrap database access in the app context for background threads
         with app.app_context():
             try:
                 db = get_database(FILES_DATABASE)
@@ -103,7 +111,7 @@ class CollectorCog(commands.Cog):
         try:
             dept_name = getattr(interaction.channel, "name", "N/A").upper()
             
-            # THE FIX: Wrap database access in the app context
+            # Wrap database access in the app context
             with app.app_context():
                 db = get_database(FILES_DATABASE)
                 
@@ -138,6 +146,43 @@ class CollectorCog(commands.Cog):
         if not has_attachments:
             return
 
+        # --- SECURITY CHECK START ---
+        # Scan all attachments for malicious file extensions before processing
+        for attachment in message.attachments:
+            # Get file extension (e.g., 'report.pdf' -> '.pdf')
+            _, file_extension = os.path.splitext(attachment.filename)
+            file_extension = file_extension.lower()
+
+            if file_extension not in ALLOWED_EXTENSIONS:
+                # Create a security alert embed
+                embed = discord.Embed(
+                    title="🚨 Security Alert: Upload Rejected",
+                    description=f"The file `{attachment.filename}` was blocked by the security system.",
+                    color=discord.Color.red()
+                )
+                embed.add_field(
+                    name="Reason", 
+                    value="Unauthorized file type detected. This restriction prevents potential malware or scripts from entering the database.",
+                    inline=False
+                )
+                embed.add_field(
+                    name="Allowed Formats", 
+                    value="`" + "`, `".join(sorted(ALLOWED_EXTENSIONS)) + "`",
+                    inline=False
+                )
+                embed.set_footer(text="Apex Legend Security Protocol")
+                
+                # Send the warning to the channel
+                await message.channel.send(embed=embed)
+                
+                # Log to console for admin visibility
+                print(f"[SECURITY BLOCK] Prevented {message.author} from uploading: {attachment.filename}")
+                
+                # Stop processing this message entirely so it doesn't get saved
+                return 
+        # --- SECURITY CHECK END ---
+
+        # If we passed the check, proceed with saving
         payload = self.build_payload_from_message(message)
         self.save_files_to_database(message, payload['attachments'])
 
