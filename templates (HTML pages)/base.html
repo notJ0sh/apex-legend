@@ -34,7 +34,7 @@
                 <li class="nav-item">
                     <a href="{{ url_for('dashboard') }}"
                         class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                        Dashboard
                     </a>
                 </li>
 
@@ -42,7 +42,7 @@
                 <li class="nav-item">
                     <a href="{{ url_for('files') }}"
                         class="nav-link {% if request.endpoint == 'files' or request.endpoint == 'edit_file' or request.endpoint == 'delete_file' %}active{% endif %}">
-                        <i class="bi bi-folder me-2"></i> Files
+                        Files
                     </a>
                 </li>
 
@@ -51,7 +51,7 @@
                 <li class="nav-item">
                     <a href="{{ url_for('manage_users') }}"
                         class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
-                        <i class="bi bi-people me-2"></i> Manage Users
+                        Manage Users
                     </a>
                 </li>
                 {% endif %}
@@ -60,7 +60,7 @@
                 <li class="nav-item">
                     <a href="{{ url_for('settings') }}"
                         class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
-                        <i class="bi bi-gear me-2"></i> Settings
+                        Settings
                     </a>
                 </li>
             </ul>
@@ -85,13 +85,13 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser1">
                         <li><a class="dropdown-item" href="{{ url_for('settings') }}">
-                            <i class="bi bi-gear me-2"></i>Settings
+                            Settings
                         </a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            Logout
                         </a></li>
                     </ul>
                 </div>
