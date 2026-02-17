@@ -3,29 +3,6 @@
 {% block title %}Settings - Apex Legend App{% endblock %}
 
 {% block content %}
-<div class="settings-container">
-    <!-- Side navbar -->
-    <div class="settings-sidebar">
-        <div class="sidebar-header">
-            <h2>Settings</h2>
-        </div>
-
-        <ul class="sidebar-menu">
-            <li class="menu-item active" data-section="account">
-                <span>👤</span> My Account
-            </li>
-        </ul>
-
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar">{{ current_user.username|first|upper }}</div>
-                <div class="user-details">
-                    <strong>{{ current_user.username }}</strong>
-                    <span>#{{ current_user.id }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Main Content -->
     <div class="settings-main">
@@ -206,8 +183,7 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </div>  
 
 <script>
     // Tab switching for settings page
@@ -292,116 +268,6 @@
 </script>
 
 <style>
-    .settings-container {
-        display: flex;
-        min-height: calc(100vh - 60px);
-        background-color: #f8f9fa;
-    }
-
-    /* Settings Left Sidebar */
-    .settings-sidebar {
-        width: 240px;
-        background-color: #2f3136;
-        color: white;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .settings-sidebar .sidebar-header {
-        padding: 24px 20px 16px;
-        border-bottom: 1px solid #202225;
-    }
-
-    .settings-sidebar .sidebar-header h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: white;
-    }
-
-    .sidebar-menu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        flex: 1;
-    }
-
-    .menu-item {
-        padding: 10px 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        color: #b9bbbe;
-        font-weight: 500;
-    }
-
-    .menu-item:hover {
-        background-color: #34373c;
-        color: white;
-    }
-
-    .menu-item.active {
-        background-color: #40444b;
-        color: white;
-        border-left: 3px solid #5865f2;
-    }
-
-    .menu-item span {
-        font-size: 18px;
-    }
-
-    .sidebar-footer {
-        padding: 16px;
-        border-top: 1px solid #202225;
-        background-color: #292b2f;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 18px;
-        color: white;
-    }
-
-    .user-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-details strong {
-        color: white;
-        font-size: 14px;
-    }
-
-    .user-details span {
-        color: #b9bbbe;
-        font-size: 12px;
-    }
-
-    /* Settings Main Content */
-    .settings-main {
-        flex: 1;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%);
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    /* Settings Tabs */
     .settings-tabs {
         display: flex;
         background-color: #f8f9fa;
