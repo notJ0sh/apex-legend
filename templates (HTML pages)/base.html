@@ -20,7 +20,7 @@
 
     <div class="d-flex" id="wrapper">
 
-        {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
+        {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' and request.endpoint != 'view_feedback_live' %}
         <div class="sidebar bg-dark text-white d-flex flex-column">
 
             <div class="sidebar-header p-3">
@@ -70,7 +70,7 @@
         <!-- MAIN CONTENT AREA -->
         <div class="d-flex flex-column w-100">
 
-            {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
+            {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' and request.endpoint != 'view_feedback_live' %}
             <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
 
                 <div class="text-dark fw-semibold ps-3">
@@ -146,10 +146,12 @@
             // Small countdown label in the header
             const indicator = document.createElement('span');
             indicator.style.cssText = 'font-size:12px; color:#6c757d; margin-right:16px; white-space:nowrap;';
+            const isFeedbackPage = currentPage === 'view_feedback_live';
             const headerDropdown = document.querySelector('header .dropdown');
-            if (headerDropdown) headerDropdown.parentNode.insertBefore(indicator, headerDropdown);
+            if (headerDropdown && !isFeedbackPage) headerDropdown.parentNode.insertBefore(indicator, headerDropdown);
 
             function updateIndicator() {
+                if (isFeedbackPage) return; // silent on feedback viewer
                 indicator.textContent = isPaused
                     ? ' Refresh paused '
                     : ` Refreshing in ${secondsLeft}s`;

@@ -59,14 +59,16 @@
                                 <small>{{ row[3] }}</small>
                             </td>
                             <td>
-                                {% if row[5] == 'Bug Report' %}
-                                    <span class="badge bg-danger">🐛 Bug</span>
-                                {% elif row[5] == 'Feature Request' %}
-                                    <span class="badge bg-primary">✨ Feature</span>
-                                {% elif row[5] == 'Improvement Suggestion' %}
+                                {% if row[5] == 'bug' %}
+                                    <span class="badge bg-danger">🐛 Bug Report</span>
+                                {% elif row[5] == 'feature' %}
+                                    <span class="badge bg-primary">✨ Feature Request</span>
+                                {% elif row[5] == 'improvement' %}
                                     <span class="badge bg-info">💡 Improvement</span>
+                                {% elif row[5] == 'other' %}
+                                    <span class="badge bg-secondary">📌 Other</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">📌 {{ row[5] }}</span>
+                                    <span class="badge bg-secondary">📌 {{ row[5]|title }}</span>
                                 {% endif %}
                             </td>
                             <td>
