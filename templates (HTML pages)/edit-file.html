@@ -1,217 +1,165 @@
-<!-- templates (HTML pages)/edit-file.html -->
-{% extends "reanne_base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Edit File - Apex Legend App{% endblock %}
 
 {% block content %}
-<div class="edit-file-container">
-    <h2>Edit File: {{ file.file_name }}</h2>
+<div id="edit-file-container" class="container py-5">
+    <h2 class="text-center text-white fw-bold mb-4">Edit File: {{ file.file_name }}</h2>
 
-    <div class="edit-form-container">
-        <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
-            <!-- Current File Info -->
-            <div class="current-info">
-                <h3>Current File Information</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Current File Name:</span>
-                        <span class="info-value">{{ file.file_name }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Current Department:</span>
-                        <span class="info-value">{{ file.department }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Current Project:</span>
-                        <span class="info-value">{{ file.project or 'N/A' }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">File Type:</span>
-                        <span class="info-value">{{ file.file_type }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Source:</span>
-                        <span class="info-value">{{ file.source|title }}</span>
+    <div id="edit-file-card" class="card border-0 shadow-lg mx-auto" style="max-width:900px;">
+        <div class="card-body p-4">
+            <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
+
+                <!-- Current File Info -->
+                <div id="current-file-info" class="alert alert-info border-info border-2 mb-4" role="alert">
+                    <h5 class="alert-heading mb-3"><i class="bi bi-info-circle-fill"></i> Current File Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card bg-white border-0">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">File Name</small>
+                                    <span class="fw-bold">{{ file.file_name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-white border-0">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Department</small>
+                                    <span class="fw-bold">{{ file.department }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white border-0">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Project</small>
+                                    <span class="fw-bold">{{ file.project or 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white border-0">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">File Type</small>
+                                    <span class="fw-bold">{{ file.file_type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white border-0">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Source</small>
+                                    <span class="fw-bold">{{ file.source|title }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Edit Fields -->
-            <div class="edit-fields">
-                <h3>Edit Fields</h3>
+                <!-- Edit Fields -->
+                <h5 id="edit-fields-heading" class="fw-bold mb-3 pb-2 border-bottom">Edit Fields</h5>
 
-                <div class="form-group">
-                    <label for="file_name">File Name</label>
-                    <input type="text" id="file_name" name="file_name" value="{{ file.file_name }}"
-                        placeholder="Enter new file name" required>
-                    <div class="error-message" id="fileNameError"></div>
+                <div class="mb-3">
+                    <label for="file_name" class="form-label fw-semibold">File Name</label>
+                    <input type="text" class="form-control form-control-lg" id="file_name" name="file_name"
+                           value="{{ file.file_name }}" placeholder="Enter new file name" required>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="fileNameError"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="department">Department</label>
-                    <select id="department" name="department" required>
+                <div class="mb-3">
+                    <label for="department" class="form-label fw-semibold">Department</label>
+                    <select class="form-select form-select-lg" id="department" name="department" required>
                         <option value="">Select Department</option>
                         {% for dept in departments %}
-                        <option value="{{ dept }}" {% if dept==file.department %}selected{% endif %}>
-                            {{ dept }}
-                        </option>
+                        <option value="{{ dept }}" {% if dept==file.department %}selected{% endif %}>{{ dept }}</option>
                         {% endfor %}
                     </select>
-                    <div class="error-message" id="departmentError"></div>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="departmentError"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="project">Project</label>
-                    <input type="text" id="project" name="project" value="{{ file.project or '' }}"
-                        placeholder="Enter project name" required>
-                    <div class="error-message" id="projectError"></div>
+                <div class="mb-4">
+                    <label for="project" class="form-label fw-semibold">Project</label>
+                    <input type="text" class="form-control form-control-lg" id="project" name="project"
+                           value="{{ file.project or '' }}" placeholder="Enter project name" required>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="projectError"></div>
                 </div>
-            </div>
 
-            <!-- Form Actions -->
-            <div class="form-actions">
-                <a href="{{ url_for('files') }}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary" id="submitBtn">Update File</button>
-            </div>
-        </form>
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a href="{{ url_for('files') }}" id="btn-cancel-edit" class="btn btn-secondary btn-lg px-5">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">Update File</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Messages Container -->
-    <div id="messageContainer" class="message-container"></div>
+    <div id="messageContainer" class="mt-4"></div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('editFileForm');
+        const form          = document.getElementById('editFileForm');
         const fileNameInput = document.getElementById('file_name');
-        const projectInput = document.getElementById('project');
-        const submitBtn = document.getElementById('submitBtn');
+        const projectInput  = document.getElementById('project');
+        const submitBtn     = document.getElementById('submitBtn');
         const messageContainer = document.getElementById('messageContainer');
 
-        // Validation functions
         function validateFileName(fileName) {
-            if (!fileName.trim()) {
-                return "File name cannot be empty";
-            }
-            if (fileName.trim().match(/^\d+$/)) {
-                return "File name cannot be just numbers";
-            }
+            if (!fileName.trim()) return "File name cannot be empty";
+            if (fileName.trim().match(/^\d+$/)) return "File name cannot be just numbers";
             return "";
         }
 
         function validateProject(project) {
-            if (!project.trim()) {
-                return "Project cannot be empty";
-            }
-            if (project.trim().match(/^\d+$/)) {
-                return "Project cannot be just numbers";
-            }
+            if (!project.trim()) return "Project cannot be empty";
+            if (project.trim().match(/^\d+$/)) return "Project cannot be just numbers";
             return "";
         }
 
-        function validateForm() {
-            let isValid = true;
-
-            // Validate file name
-            const fileNameError = validateFileName(fileNameInput.value);
-            const fileNameErrorElement = document.getElementById('fileNameError');
-            if (fileNameError) {
-                fileNameErrorElement.textContent = fileNameError;
-                fileNameErrorElement.style.display = 'block';
-                isValid = false;
+        function showFieldError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('d-none');
             } else {
-                fileNameErrorElement.style.display = 'none';
+                errorEl.classList.add('d-none');
             }
-
-            // Validate project
-            const projectError = validateProject(projectInput.value);
-            const projectErrorElement = document.getElementById('projectError');
-            if (projectError) {
-                projectErrorElement.textContent = projectError;
-                projectErrorElement.style.display = 'block';
-                isValid = false;
-            } else {
-                projectErrorElement.style.display = 'none';
-            }
-
-            return isValid;
         }
 
-        // Real-time validation
-        fileNameInput.addEventListener('input', function () {
-            const error = validateFileName(this.value);
-            const errorElement = document.getElementById('fileNameError');
-            if (error) {
-                errorElement.textContent = error;
-                errorElement.style.display = 'block';
-            } else {
-                errorElement.style.display = 'none';
-            }
-        });
+        fileNameInput.addEventListener('input', function () { showFieldError('fileName', validateFileName(this.value)); });
+        projectInput.addEventListener('input',  function () { showFieldError('project',  validateProject(this.value));  });
 
-        projectInput.addEventListener('input', function () {
-            const error = validateProject(this.value);
-            const errorElement = document.getElementById('projectError');
-            if (error) {
-                errorElement.textContent = error;
-                errorElement.style.display = 'block';
-            } else {
-                errorElement.style.display = 'none';
-            }
-        });
-
-        // Form submission
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+            const fileNameError = validateFileName(fileNameInput.value);
+            const projectError  = validateProject(projectInput.value);
+            showFieldError('fileName', fileNameError);
+            showFieldError('project',  projectError);
 
-            if (!validateForm()) {
-                showMessage('Please fix the errors above.', 'error');
+            if (fileNameError || projectError) {
+                messageContainer.innerHTML = '<div class="alert alert-danger text-center">Please fix the errors above.</div>';
                 return;
             }
 
-            // Disable submit button and show loading
-            submitBtn.disabled = true;
+            submitBtn.disabled    = true;
             submitBtn.textContent = 'Updating...';
 
-            // Submit form
-            fetch(this.action, {
-                method: 'POST',
-                body: new FormData(this)
-            })
+            fetch(this.action, { method: 'POST', body: new FormData(this) })
                 .then(response => {
                     if (response.ok) {
-                        showMessage('File updated successfully! Redirecting...', 'success');
-                        setTimeout(() => {
-                            window.location.href = "{{ url_for('files') }}";
-                        }, 1500);
+                        messageContainer.innerHTML = '<div class="alert alert-success text-center">File updated successfully! Redirecting...</div>';
+                        setTimeout(() => window.location.href = "{{ url_for('files') }}", 1500);
                     } else {
-                        return response.text().then(text => {
-                            throw new Error(text);
-                        });
+                        return response.text().then(text => { throw new Error(text); });
                     }
                 })
                 .catch(error => {
-                    showMessage('Error: ' + error.message, 'error');
-                    submitBtn.disabled = false;
+                    messageContainer.innerHTML = '<div class="alert alert-danger text-center">Error: ' + error.message + '</div>';
+                    submitBtn.disabled    = false;
                     submitBtn.textContent = 'Update File';
                 });
         });
-
-        function showMessage(message, type) {
-            messageContainer.innerHTML = `
-            <div class="message ${type}">
-                ${message}
-            </div>
-        `;
-            messageContainer.style.display = 'block';
-
-            // Auto-hide success messages after 3 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    messageContainer.style.display = 'none';
-                }, 3000);
-            }
-        }
     });
 </script>
 {% endblock %}

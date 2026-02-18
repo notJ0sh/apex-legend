@@ -4,19 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Apex Legend Admin</title>
+    <title>{% block title %}Apex Legend Admin{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Main CSS File -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 
     <div class="d-flex" id="wrapper">
 
-        {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
-        <div class="sidebar bg-dark text-white d-flex flex-column" style="width: 250px; min-height: 100vh;">
+        {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' and request.endpoint != 'view_feedback_live' %}
+        <div class="sidebar bg-dark text-white d-flex flex-column">
 
             <div class="sidebar-header p-3">
                 <a href="{{ url_for('dashboard') }}" class="text-white text-decoration-none">
@@ -27,12 +32,13 @@
             <ul class="nav flex-column mb-auto mt-2">
                 <li class="nav-item">
                     <a href="{{ url_for('files') }}"
-                        class="nav-link {% if request.endpoint == 'files' %}active{% endif %}">
+                        class="nav-link {% if request.endpoint == 'files' or request.endpoint == 'edit_file' or request.endpoint == 'delete_file' %}active{% endif %}">
                         Files
                     </a>
                 </li>
 
                 {% if current_user.role == 'admin' %}
+                <!-- Manage users (Admin only) -->
                 <li class="nav-item">
                     <a href="{{ url_for('dashboard') }}"
                         class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
@@ -82,19 +88,25 @@
                         <span>{{ current_user.username }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser1">
-                        <li><a class="dropdown-item" href="{{ url_for('settings') }}">Settings</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('settings') }}">
+                            Settings
+                        </a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Logout</a></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                            Logout
+                        </a></li>
                     </ul>
                 </div>
             </header>
             {% endif %}
 
+            <!-- MAIN CONTENT -->
             <div class="flex-grow-1" style="overflow-y: auto;">
                 <main class="container-fluid p-4">
 
+                    <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                     {% for category, message in messages %}
@@ -106,6 +118,7 @@
                     {% endif %}
                     {% endwith %}
 
+                    <!-- Page Content -->
                     {% block content %}{% endblock %}
                 </main>
             </div>
@@ -113,7 +126,83 @@
 
     </div>
 
+    <!-- Bootstrap 5.3.0 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+        {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
+    <script>
+        (function () {
+            const REFRESH_INTERVAL = 30000; // 30 seconds
+            const TYPING_PAUSE     = 10000; // resume 10s after user stops typing
+
+            // Completely disable auto-refresh on pages with active forms
+            const NO_REFRESH_PAGES = ['settings', 'edit_file'];
+            const currentPage = '{{ request.endpoint }}';
+            if (NO_REFRESH_PAGES.includes(currentPage)) return;
+
+            let refreshTimer  = null;
+            let typingTimeout = null;
+            let isPaused      = false;
+            let secondsLeft   = REFRESH_INTERVAL / 1000;
+
+            // Small countdown label in the header
+            const indicator = document.createElement('span');
+            indicator.className = 'small text-muted me-3 text-nowrap';;
+            const isFeedbackPage = currentPage === 'view_feedback_live';
+            const headerDropdown = document.querySelector('header .dropdown');
+            if (headerDropdown && !isFeedbackPage) headerDropdown.parentNode.insertBefore(indicator, headerDropdown);
+
+            function updateIndicator() {
+                if (isFeedbackPage) return; // silent on feedback viewer
+                indicator.textContent = isPaused
+                    ? ' Refresh paused '
+                    : ` Refreshing in ${secondsLeft}s`;
+            }
+
+            function scheduleRefresh() {
+                secondsLeft = REFRESH_INTERVAL / 1000;
+                updateIndicator();
+                clearInterval(refreshTimer);
+                refreshTimer = setInterval(() => {
+                    if (!isPaused) {
+                        secondsLeft--;
+                        updateIndicator();
+                        if (secondsLeft <= 0) location.reload();
+                    }
+                }, 1000);
+            }
+
+            // FIX: Only pause when the user is actually typing text.
+            // Clicking buttons, filter dropdowns, checkboxes and reset buttons do NOT pause.
+            document.addEventListener('input', (e) => {
+                const tag  = e.target.tagName;
+                const type = (e.target.type || '').toLowerCase();
+                const isTextInput = tag === 'TEXTAREA' ||
+                    (tag === 'INPUT' && ['text', 'search', 'email', 'password', 'tel', 'number', 'url'].includes(type));
+
+                if (!isTextInput) return; // ignore selects, checkboxes, buttons etc.
+
+                isPaused = true;
+                updateIndicator();
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    isPaused = false;
+                    scheduleRefresh();
+                }, TYPING_PAUSE);
+            });
+
+            // Pause while the user dropdown or any modal is open
+            document.addEventListener('show.bs.dropdown', () => { isPaused = true;  updateIndicator(); });
+            document.addEventListener('hide.bs.dropdown', () => { isPaused = false; scheduleRefresh(); });
+            document.addEventListener('show.bs.modal',    () => { isPaused = true;  updateIndicator(); });
+            document.addEventListener('hide.bs.modal',    () => { isPaused = false; scheduleRefresh(); });
+
+            scheduleRefresh();
+        })();
+    </script>
+    {% endif %}
 </body>
 
 </html>
