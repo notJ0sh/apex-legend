@@ -30,15 +30,6 @@
             </div>
 
             <ul class="nav flex-column mb-auto mt-2">
-                <!-- Dashboard -->
-                <li class="nav-item">
-                    <a href="{{ url_for('dashboard') }}"
-                        class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                        Dashboard
-                    </a>
-                </li>
-
-                <!-- Files -->
                 <li class="nav-item">
                     <a href="{{ url_for('files') }}"
                         class="nav-link {% if request.endpoint == 'files' or request.endpoint == 'edit_file' or request.endpoint == 'delete_file' %}active{% endif %}">
@@ -49,14 +40,27 @@
                 {% if current_user.role == 'admin' %}
                 <!-- Manage users (Admin only) -->
                 <li class="nav-item">
+                    <a href="{{ url_for('dashboard') }}"
+                        class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="{{ url_for('manage_users') }}"
                         class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
-                        Manage Users
+                        Users
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ url_for('logs') }}"
+                        class="nav-link {% if request.endpoint == 'logs' %}active{% endif %}">
+                        Logs
                     </a>
                 </li>
                 {% endif %}
 
-                <!-- Settings -->
                 <li class="nav-item">
                     <a href="{{ url_for('settings') }}"
                         class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
@@ -67,11 +71,11 @@
         </div>
         {% endif %}
 
-        <!-- MAIN CONTENT AREA -->
-        <div class="d-flex flex-column w-100">
+        <div class="d-flex flex-column w-100" style="height: 100vh; overflow: hidden;">
 
-            {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' and request.endpoint != 'view_feedback_live' %}
-            <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
+            {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
+            <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center"
+                style="height: 70px; flex-shrink: 0;">
 
                 <div class="text-dark fw-semibold ps-3">
                     Welcome, {{ current_user.username }}
