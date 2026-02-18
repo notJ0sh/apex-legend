@@ -4,11 +4,12 @@
 
 {% block content %}
 <div class="container py-5">
-    <h2 class="text-center mb-4 fw-bold">Delete File</h2>
+    <h2 class="text-center text-white fw-bold mb-4">Delete File</h2>
 
-    <div class="card shadow-lg border-0 mx-auto" style="max-width: 800px;">
+    <div class="card border-0 shadow-lg mx-auto" style="max-width:800px;">
         <div class="card-body p-4">
-            <!-- Warning Message -->
+
+            <!-- Warning -->
             <div class="alert alert-warning border-warning border-2 mb-4" role="alert">
                 <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This action cannot be undone!</h4>
                 <p class="mb-0">You are about to permanently delete the following file:</p>
@@ -51,11 +52,7 @@
                         <div class="d-flex justify-content-between">
                             <span class="fw-semibold text-secondary">Date:</span>
                             <span class="text-end">
-                                {% if file.time_stamp %}
-                                {{ format_datetime(file.time_stamp) }}
-                                {% else %}
-                                N/A
-                                {% endif %}
+                                {% if file.time_stamp %}{{ format_datetime(file.time_stamp) }}{% else %}N/A{% endif %}
                             </span>
                         </div>
                     </div>
@@ -63,9 +60,9 @@
             </div>
 
             <!-- Confirmation Prompt -->
-            <div class="alert alert-danger border-danger border-start border-4 mb-4" role="alert">
+            <div class="alert alert-danger border-start border-danger border-4 mb-4" role="alert">
                 <p class="fw-bold mb-2">Are you sure you want to delete this file?</p>
-                <p class="mb-2">This will:</p>
+                <p class="mb-1">This will:</p>
                 <ul class="mb-0">
                     <li>Permanently remove the file from the database</li>
                     <li>Delete the actual file from the server</li>
@@ -78,7 +75,7 @@
                 <label for="confirmText" class="form-label fw-bold text-center d-block">
                     Type "DELETE" to confirm:
                 </label>
-                <input type="text" class="form-control form-control-lg text-center text-uppercase fw-bold border-danger border-3" 
+                <input type="text" class="form-control form-control-lg text-center text-uppercase fw-bold border-danger border-3"
                        id="confirmText" placeholder="Type DELETE here">
                 <div class="alert alert-danger mt-2 d-none" role="alert" id="confirmError">
                     Please type "DELETE" to confirm
@@ -93,15 +90,14 @@
         </div>
     </div>
 
-    <!-- Messages Container -->
     <div id="messageContainer" class="mt-4"></div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const confirmInput = document.getElementById('confirmText');
-        const deleteBtn = document.getElementById('deleteBtn');
-        const confirmError = document.getElementById('confirmError');
+        const confirmInput     = document.getElementById('confirmText');
+        const deleteBtn        = document.getElementById('deleteBtn');
+        const confirmError     = document.getElementById('confirmError');
         const messageContainer = document.getElementById('messageContainer');
 
         confirmInput.addEventListener('input', function () {
@@ -113,7 +109,7 @@
         deleteBtn.addEventListener('click', function () {
             if (!confirm('Are you absolutely sure? This action cannot be undone!')) return;
 
-            deleteBtn.disabled = true;
+            deleteBtn.disabled    = true;
             deleteBtn.textContent = 'Deleting...';
 
             fetch("{{ url_for('delete_file', file_id=file.id) }}", {
@@ -131,7 +127,7 @@
             })
             .catch(error => {
                 showMessage('Error: ' + error.message, 'danger');
-                deleteBtn.disabled = false;
+                deleteBtn.disabled    = false;
                 deleteBtn.textContent = 'Delete File';
             });
         });

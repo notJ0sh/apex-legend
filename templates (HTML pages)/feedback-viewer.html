@@ -6,11 +6,9 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-white fw-bold mb-0">Live Feedback Viewer</h2>
-        <div class="d-flex gap-2">
-            <button onclick="location.reload()" class="btn btn-primary">
-                Refresh
-            </button>
-        </div>
+        <button onclick="location.reload()" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
     </div>
 
     {% if message %}
@@ -18,28 +16,29 @@
     {% endif %}
 
     {% if feedback_data %}
-    <div class="card shadow-sm mb-3 border-0">
-        <div class="card-body">
-            <p class="mb-0 text-muted">
-                <strong>Total Feedback:</strong> {{ feedback_data|length }}
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-2 px-3">
+            <p class="mb-0 text-muted small">
+                <strong>Total Feedback:</strong>
+                <span class="badge bg-primary ms-1">{{ feedback_data|length }}</span>
             </p>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 70vh;">
-                <table class="table table-hover table-striped mb-0">
+            <div class="table-responsive" style="max-height:70vh;">
+                <table class="table table-hover table-striped mb-0 small">
                     <thead class="table-dark sticky-top">
                         <tr>
-                            <th style="width: 12%;">Timestamp</th>
-                            <th style="width: 8%;">User</th>
-                            <th style="width: 8%;">Dept</th>
-                            <th style="width: 12%;">Type</th>
-                            <th style="width: 15%;">Subject</th>
-                            <th style="width: 25%;">Message</th>
-                            <th style="width: 8%;">Contact?</th>
-                            <th style="width: 12%;">Contact Info</th>
+                            <th style="width:12%;">Timestamp</th>
+                            <th style="width:8%;">User</th>
+                            <th style="width:8%;">Dept</th>
+                            <th style="width:12%;">Type</th>
+                            <th style="width:15%;">Subject</th>
+                            <th style="width:25%;">Message</th>
+                            <th style="width:8%;">Contact?</th>
+                            <th style="width:12%;">Contact Info</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,7 +65,7 @@
                             </td>
                             <td><strong>{{ row[6] }}</strong></td>
                             <td>
-                                <div style="max-height: 60px; overflow-y: auto; font-size: 0.9em;">
+                                <div style="max-height:60px; overflow-y:auto; font-size:0.9em;">
                                     {{ row[7] }}
                                 </div>
                             </td>
@@ -80,12 +79,8 @@
                             <td>
                                 {% if row[8] == 'Yes' %}
                                     <small>
-                                        {% if row[9] and row[9] != 'N/A' %}
-                                            <div>{{ row[9] }}</div>
-                                        {% endif %}
-                                        {% if row[10] and row[10] != 'N/A' %}
-                                            <div>{{ row[10] }}</div>
-                                        {% endif %}
+                                        {% if row[9] and row[9] != 'N/A' %}<div>{{ row[9] }}</div>{% endif %}
+                                        {% if row[10] and row[10] != 'N/A' %}<div>{{ row[10] }}</div>{% endif %}
                                     </small>
                                 {% else %}
                                     <span class="text-muted">-</span>

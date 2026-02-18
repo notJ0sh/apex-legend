@@ -4,18 +4,18 @@
 
 {% block content %}
 <div class="container py-5">
-    <h2 class="text-center mb-4 fw-bold">Edit File: {{ file.file_name }}</h2>
+    <h2 class="text-center text-white fw-bold mb-4">Edit File: {{ file.file_name }}</h2>
 
-    <div class="card shadow-lg border-0 mx-auto" style="max-width: 900px;">
+    <div class="card border-0 shadow-lg mx-auto" style="max-width:900px;">
         <div class="card-body p-4">
             <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
-                
+
                 <!-- Current File Info -->
                 <div class="alert alert-info border-info border-2 mb-4" role="alert">
                     <h5 class="alert-heading mb-3"><i class="bi bi-info-circle-fill"></i> Current File Information</h5>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="card bg-white">
+                            <div class="card bg-white border-0">
                                 <div class="card-body py-2">
                                     <small class="text-muted d-block text-uppercase fw-semibold">File Name</small>
                                     <span class="fw-bold">{{ file.file_name }}</span>
@@ -23,7 +23,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card bg-white">
+                            <div class="card bg-white border-0">
                                 <div class="card-body py-2">
                                     <small class="text-muted d-block text-uppercase fw-semibold">Department</small>
                                     <span class="fw-bold">{{ file.department }}</span>
@@ -31,7 +31,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-white">
+                            <div class="card bg-white border-0">
                                 <div class="card-body py-2">
                                     <small class="text-muted d-block text-uppercase fw-semibold">Project</small>
                                     <span class="fw-bold">{{ file.project or 'N/A' }}</span>
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-white">
+                            <div class="card bg-white border-0">
                                 <div class="card-body py-2">
                                     <small class="text-muted d-block text-uppercase fw-semibold">File Type</small>
                                     <span class="fw-bold">{{ file.file_type }}</span>
@@ -47,7 +47,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-white">
+                            <div class="card bg-white border-0">
                                 <div class="card-body py-2">
                                     <small class="text-muted d-block text-uppercase fw-semibold">Source</small>
                                     <span class="fw-bold">{{ file.source|title }}</span>
@@ -58,11 +58,11 @@
                 </div>
 
                 <!-- Edit Fields -->
-                <h5 class="mb-3 pb-2 border-bottom fw-bold">Edit Fields</h5>
+                <h5 class="fw-bold mb-3 pb-2 border-bottom">Edit Fields</h5>
 
                 <div class="mb-3">
                     <label for="file_name" class="form-label fw-semibold">File Name</label>
-                    <input type="text" class="form-control form-control-lg" id="file_name" name="file_name" 
+                    <input type="text" class="form-control form-control-lg" id="file_name" name="file_name"
                            value="{{ file.file_name }}" placeholder="Enter new file name" required>
                     <div class="alert alert-danger mt-2 d-none" role="alert" id="fileNameError"></div>
                 </div>
@@ -80,7 +80,7 @@
 
                 <div class="mb-4">
                     <label for="project" class="form-label fw-semibold">Project</label>
-                    <input type="text" class="form-control form-control-lg" id="project" name="project" 
+                    <input type="text" class="form-control form-control-lg" id="project" name="project"
                            value="{{ file.project or '' }}" placeholder="Enter project name" required>
                     <div class="alert alert-danger mt-2 d-none" role="alert" id="projectError"></div>
                 </div>
@@ -94,16 +94,15 @@
         </div>
     </div>
 
-    <!-- Messages Container -->
     <div id="messageContainer" class="mt-4"></div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('editFileForm');
+        const form          = document.getElementById('editFileForm');
         const fileNameInput = document.getElementById('file_name');
-        const projectInput = document.getElementById('project');
-        const submitBtn = document.getElementById('submitBtn');
+        const projectInput  = document.getElementById('project');
+        const submitBtn     = document.getElementById('submitBtn');
         const messageContainer = document.getElementById('messageContainer');
 
         function validateFileName(fileName) {
@@ -128,29 +127,22 @@
             }
         }
 
-        fileNameInput.addEventListener('input', function () {
-            showFieldError('fileName', validateFileName(this.value));
-        });
-
-        projectInput.addEventListener('input', function () {
-            showFieldError('project', validateProject(this.value));
-        });
+        fileNameInput.addEventListener('input', function () { showFieldError('fileName', validateFileName(this.value)); });
+        projectInput.addEventListener('input',  function () { showFieldError('project',  validateProject(this.value));  });
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-
             const fileNameError = validateFileName(fileNameInput.value);
-            const projectError = validateProject(projectInput.value);
-
+            const projectError  = validateProject(projectInput.value);
             showFieldError('fileName', fileNameError);
-            showFieldError('project', projectError);
+            showFieldError('project',  projectError);
 
             if (fileNameError || projectError) {
                 messageContainer.innerHTML = '<div class="alert alert-danger text-center">Please fix the errors above.</div>';
                 return;
             }
 
-            submitBtn.disabled = true;
+            submitBtn.disabled    = true;
             submitBtn.textContent = 'Updating...';
 
             fetch(this.action, { method: 'POST', body: new FormData(this) })
@@ -164,7 +156,7 @@
                 })
                 .catch(error => {
                     messageContainer.innerHTML = '<div class="alert alert-danger text-center">Error: ' + error.message + '</div>';
-                    submitBtn.disabled = false;
+                    submitBtn.disabled    = false;
                     submitBtn.textContent = 'Update File';
                 });
         });
