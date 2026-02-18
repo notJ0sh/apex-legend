@@ -3,74 +3,98 @@
 {% block title %}Delete File - Apex Legend App{% endblock %}
 
 {% block content %}
-<div class="delete-file-container">
-    <h2>Delete File</h2>
+<div class="container py-5">
+    <h2 class="text-center mb-4 fw-bold">Delete File</h2>
 
-    <div class="delete-confirmation">
-        <div class="warning-message">
-            <h3>⚠️ Warning: This action cannot be undone!</h3>
-            <p>You are about to permanently delete the following file:</p>
-        </div>
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 800px;">
+        <div class="card-body p-4">
+            <!-- Warning Message -->
+            <div class="alert alert-warning border-warning border-2 mb-4" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This action cannot be undone!</h4>
+                <p class="mb-0">You are about to permanently delete the following file:</p>
+            </div>
 
-        <div class="file-details">
-            <div class="detail-item">
-                <span class="detail-label">File Name:</span>
-                <span class="detail-value">{{ file.file_name }}</span>
+            <!-- File Details -->
+            <div class="bg-light rounded p-4 mb-4 border">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">File Name:</span>
+                            <span class="text-end">{{ file.file_name }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">File Type:</span>
+                            <span class="text-end">{{ file.file_type }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Department:</span>
+                            <span class="text-end">{{ file.department }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Project:</span>
+                            <span class="text-end">{{ file.project or 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Uploaded By:</span>
+                            <span class="text-end">{{ file.user or 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Date:</span>
+                            <span class="text-end">
+                                {% if file.time_stamp %}
+                                {{ format_datetime(file.time_stamp) }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="detail-item">
-                <span class="detail-label">File Type:</span>
-                <span class="detail-value">{{ file.file_type }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Department:</span>
-                <span class="detail-value">{{ file.department }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Project:</span>
-                <span class="detail-value">{{ file.project or 'N/A' }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Uploaded By:</span>
-                <span class="detail-value">{{ file.user or 'N/A' }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Date:</span>
-                <span class="detail-value">
-                    {% if file.time_stamp %}
-                    {{ format_datetime(file.time_stamp) }}
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </span>
-            </div>
-        </div>
 
-        <div class="confirmation-prompt">
-            <p><strong>Are you sure you want to delete this file?</strong></p>
-            <p>This will:</p>
-            <ul>
-                <li>Permanently remove the file from the database</li>
-                <li>Delete the actual file from the server</li>
-                <li>This action cannot be undone</li>
-            </ul>
-        </div>
+            <!-- Confirmation Prompt -->
+            <div class="alert alert-danger border-danger border-start border-4 mb-4" role="alert">
+                <p class="fw-bold mb-2">Are you sure you want to delete this file?</p>
+                <p class="mb-2">This will:</p>
+                <ul class="mb-0">
+                    <li>Permanently remove the file from the database</li>
+                    <li>Delete the actual file from the server</li>
+                    <li>This action cannot be undone</li>
+                </ul>
+            </div>
 
-        <div class="confirmation-input">
-            <label for="confirmText">
-                Type "DELETE" to confirm:
-            </label>
-            <input type="text" id="confirmText" placeholder="Type DELETE here">
-            <div class="error-message" id="confirmError"></div>
-        </div>
+            <!-- Confirmation Input -->
+            <div class="mb-4">
+                <label for="confirmText" class="form-label fw-bold text-center d-block">
+                    Type "DELETE" to confirm:
+                </label>
+                <input type="text" class="form-control form-control-lg text-center text-uppercase fw-bold border-danger border-3" 
+                       id="confirmText" placeholder="Type DELETE here">
+                <div class="alert alert-danger mt-2 d-none" role="alert" id="confirmError">
+                    Please type "DELETE" to confirm
+                </div>
+            </div>
 
-        <div class="action-buttons">
-            <a href="{{ url_for('files') }}" class="btn-secondary">Cancel</a>
-            <button id="deleteBtn" class="btn-danger" disabled>Delete File</button>
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between gap-3 pt-3 border-top">
+                <a href="{{ url_for('files') }}" class="btn btn-secondary btn-lg px-5">Cancel</a>
+                <button id="deleteBtn" class="btn btn-danger btn-lg px-5" disabled>Delete File</button>
+            </div>
         </div>
     </div>
 
     <!-- Messages Container -->
-    <div id="messageContainer" class="message-container"></div>
+    <div id="messageContainer" class="mt-4"></div>
 </div>
 
 <script>
@@ -80,381 +104,41 @@
         const confirmError = document.getElementById('confirmError');
         const messageContainer = document.getElementById('messageContainer');
 
-        // Enable delete button only when "DELETE" is typed
         confirmInput.addEventListener('input', function () {
             const isConfirmed = this.value.trim().toUpperCase() === 'DELETE';
-
-            if (isConfirmed) {
-                deleteBtn.disabled = false;
-                confirmError.style.display = 'none';
-            } else {
-                deleteBtn.disabled = true;
-                confirmError.style.display = 'block';
-                confirmError.textContent = 'Please type "DELETE" to confirm';
-            }
+            deleteBtn.disabled = !isConfirmed;
+            confirmError.classList.toggle('d-none', isConfirmed);
         });
 
-        // Delete button click handler
         deleteBtn.addEventListener('click', function () {
-            if (!confirmInput.value.trim().toUpperCase() === 'DELETE') {
-                return;
-            }
+            if (!confirm('Are you absolutely sure? This action cannot be undone!')) return;
 
-            // Show final confirmation dialog
-            if (!confirm('Are you absolutely sure? This action cannot be undone!')) {
-                return;
-            }
-
-            // Disable button and show loading
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            // Send delete request
             fetch("{{ url_for('delete_file', file_id=file.id) }}", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ confirm: 'DELETE' })
             })
-                .then(response => {
-                    if (response.ok) {
-                        showMessage('File deleted successfully! Redirecting...', 'success');
-                        setTimeout(() => {
-                            window.location.href = "{{ url_for('files') }}";
-                        }, 1500);
-                    } else {
-                        return response.text().then(text => {
-                            throw new Error(text);
-                        });
-                    }
-                })
-                .catch(error => {
-                    showMessage('Error: ' + error.message, 'error');
-                    deleteBtn.disabled = false;
-                    deleteBtn.textContent = 'Delete File';
-                });
+            .then(response => {
+                if (response.ok) {
+                    showMessage('File deleted successfully! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = "{{ url_for('files') }}", 1500);
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'danger');
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Delete File';
+            });
         });
 
         function showMessage(message, type) {
-            messageContainer.innerHTML = `
-            <div class="message ${type}">
-                ${message}
-            </div>
-        `;
-            messageContainer.style.display = 'block';
+            messageContainer.innerHTML = `<div class="alert alert-${type} text-center" role="alert">${message}</div>`;
         }
     });
 </script>
-
-<style>
-    .delete-file-container {
-        padding: 30px;
-        background-color: #f8f9fa;
-        min-height: calc(100vh - 100px);
-    }
-
-    .delete-file-container h2 {
-        color: #2f3136;
-        margin-bottom: 30px;
-        font-size: 28px;
-        font-weight: 700;
-        text-align: center;
-    }
-
-    .delete-confirmation {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        padding: 40px;
-        margin-top: 20px;
-        border: 1px solid #e9ecef;
-    }
-
-    /* Warning Message */
-    .delete-file-container .warning-message {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        border: 2px solid #ffc107;
-        border-radius: 10px;
-        padding: 25px;
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .delete-file-container .warning-message::before {
-        content: "⚠️";
-        position: absolute;
-        top: 20px;
-        right: 25px;
-        font-size: 32px;
-        opacity: 0.3;
-    }
-
-    .delete-file-container .warning-message h3 {
-        color: #856404;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 22px;
-        font-weight: 700;
-    }
-
-    .delete-file-container .warning-message p {
-        color: #856404;
-        margin: 10px 0;
-        font-size: 16px;
-        line-height: 1.5;
-    }
-
-    /* File Details */
-    .delete-file-container .file-details {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 10px;
-        padding: 25px;
-        margin-bottom: 30px;
-        border: 1px solid #dee2e6;
-    }
-
-    .delete-file-container .detail-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 14px 0;
-        border-bottom: 1px solid #e9ecef;
-        transition: background-color 0.2s;
-    }
-
-    .delete-file-container .detail-item:hover {
-        background-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .delete-file-container .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .delete-file-container .detail-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 15px;
-        min-width: 140px;
-    }
-
-    .delete-file-container .detail-value {
-        color: #6c757d;
-        font-size: 15px;
-        font-weight: 500;
-        text-align: right;
-        flex: 1;
-        padding-left: 20px;
-    }
-
-    /* Confirmation Prompt */
-    .delete-file-container .confirmation-prompt {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-left: 6px solid #dc3545;
-        padding: 22px 25px;
-        margin-bottom: 30px;
-        border-radius: 0 10px 10px 0;
-        position: relative;
-    }
-
-    .delete-file-container .confirmation-prompt::before {
-        content: "";
-        position: absolute;
-        left: -6px;
-        top: 0;
-        bottom: 0;
-        width: 6px;
-        background: linear-gradient(to bottom, #dc3545, #c82333);
-    }
-
-    .delete-file-container .confirmation-prompt p {
-        margin: 12px 0;
-        font-size: 16px;
-        color: #495057;
-    }
-
-    .delete-file-container .confirmation-prompt p strong {
-        color: #dc3545;
-        font-weight: 700;
-    }
-
-    .delete-file-container .confirmation-prompt ul {
-        margin: 15px 0;
-        padding-left: 25px;
-        color: #6c757d;
-    }
-
-    .delete-file-container .confirmation-prompt li {
-        margin: 10px 0;
-        font-size: 15px;
-        position: relative;
-        padding-left: 10px;
-    }
-
-    .delete-file-container .confirmation-prompt li::before {
-        content: "•";
-        position: absolute;
-        left: -15px;
-        color: #dc3545;
-        font-size: 20px;
-    }
-
-    /* Confirmation Input */
-    .delete-file-container .confirmation-input {
-        margin-bottom: 35px;
-    }
-
-    .delete-file-container .confirmation-input label {
-        display: block;
-        margin-bottom: 12px;
-        font-weight: 700;
-        color: #495057;
-        font-size: 16px;
-        text-align: center;
-    }
-
-    .delete-file-container .confirmation-input input {
-        width: 100%;
-        padding: 16px;
-        border: 3px solid #dc3545;
-        border-radius: 10px;
-        font-size: 18px;
-        font-weight: 700;
-        text-align: center;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #dc3545;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-
-    .delete-file-container .confirmation-input input:focus {
-        outline: none;
-        border-color: #bd2130;
-        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.25);
-        transform: scale(1.02);
-    }
-
-    .delete-file-container .confirmation-input input::placeholder {
-        color: #adb5bd;
-        letter-spacing: normal;
-        text-transform: none;
-        font-weight: normal;
-    }
-
-    .delete-file-container .error-message {
-        color: #dc3545;
-        font-size: 14px;
-        margin-top: 10px;
-        display: none;
-        padding: 10px 15px;
-        background-color: #f8d7da;
-        border-radius: 6px;
-        border-left: 4px solid #dc3545;
-        text-align: center;
-        font-weight: 500;
-    }
-
-    /* Action Buttons */
-    .delete-file-container .action-buttons {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 30px;
-        padding-top: 25px;
-        border-top: 2px solid #f0f0f0;
-    }
-
-    .delete-file-container .btn-danger,
-    .delete-file-container .btn-secondary {
-        padding: 16px 36px;
-        border: none;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-        min-width: 160px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .delete-file-container .btn-danger {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
-    }
-
-    .delete-file-container .btn-danger:hover {
-        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
-    }
-
-    .delete-file-container .btn-danger:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .delete-file-container .btn-secondary {
-        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-        color: white;
-    }
-
-    .delete-file-container .btn-secondary:hover {
-        background: linear-gradient(135deg, #545b62 0%, #3d4348 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
-    }
-
-    /* Message Container */
-    .delete-file-container .message-container {
-        margin-top: 25px;
-    }
-
-    .delete-file-container .message {
-        padding: 18px 20px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        border: 2px solid transparent;
-        animation: slideIn 0.3s ease;
-    }
-
-    .delete-file-container .message.success {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        color: #155724;
-        border-color: #b1dfbb;
-    }
-
-    .delete-file-container .message.success::before {
-        content: "✓";
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .delete-file-container .message.error {
-        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-        color: #721c24;
-        border-color: #f1b0b7;
-    }
-
-    .delete-file-container .message.error::before {
-        content: "✗";
-        font-size: 20px;
-        font-weight: bold;
-    }
-</style>
 {% endblock %}

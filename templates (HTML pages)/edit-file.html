@@ -3,80 +3,99 @@
 {% block title %}Edit File - Apex Legend App{% endblock %}
 
 {% block content %}
-<div class="edit-file-container">
-    <h2>Edit File: {{ file.file_name }}</h2>
+<div class="container py-5">
+    <h2 class="text-center mb-4 fw-bold">Edit File: {{ file.file_name }}</h2>
 
-    <div class="edit-form-container">
-        <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
-            <!-- Current File Info -->
-            <div class="current-info">
-                <h3>Current File Information</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Current File Name:</span>
-                        <span class="info-value">{{ file.file_name }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Current Department:</span>
-                        <span class="info-value">{{ file.department }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Current Project:</span>
-                        <span class="info-value">{{ file.project or 'N/A' }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">File Type:</span>
-                        <span class="info-value">{{ file.file_type }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Source:</span>
-                        <span class="info-value">{{ file.source|title }}</span>
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 900px;">
+        <div class="card-body p-4">
+            <form id="editFileForm" method="POST" action="{{ url_for('update_file', file_id=file.id) }}">
+                
+                <!-- Current File Info -->
+                <div class="alert alert-info border-info border-2 mb-4" role="alert">
+                    <h5 class="alert-heading mb-3"><i class="bi bi-info-circle-fill"></i> Current File Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card bg-white">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">File Name</small>
+                                    <span class="fw-bold">{{ file.file_name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-white">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Department</small>
+                                    <span class="fw-bold">{{ file.department }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Project</small>
+                                    <span class="fw-bold">{{ file.project or 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">File Type</small>
+                                    <span class="fw-bold">{{ file.file_type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-white">
+                                <div class="card-body py-2">
+                                    <small class="text-muted d-block text-uppercase fw-semibold">Source</small>
+                                    <span class="fw-bold">{{ file.source|title }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Edit Fields -->
-            <div class="edit-fields">
-                <h3>Edit Fields</h3>
+                <!-- Edit Fields -->
+                <h5 class="mb-3 pb-2 border-bottom fw-bold">Edit Fields</h5>
 
-                <div class="form-group">
-                    <label for="file_name">File Name</label>
-                    <input type="text" id="file_name" name="file_name" value="{{ file.file_name }}"
-                        placeholder="Enter new file name" required>
-                    <div class="error-message" id="fileNameError"></div>
+                <div class="mb-3">
+                    <label for="file_name" class="form-label fw-semibold">File Name</label>
+                    <input type="text" class="form-control form-control-lg" id="file_name" name="file_name" 
+                           value="{{ file.file_name }}" placeholder="Enter new file name" required>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="fileNameError"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="department">Department</label>
-                    <select id="department" name="department" required>
+                <div class="mb-3">
+                    <label for="department" class="form-label fw-semibold">Department</label>
+                    <select class="form-select form-select-lg" id="department" name="department" required>
                         <option value="">Select Department</option>
                         {% for dept in departments %}
-                        <option value="{{ dept }}" {% if dept==file.department %}selected{% endif %}>
-                            {{ dept }}
-                        </option>
+                        <option value="{{ dept }}" {% if dept==file.department %}selected{% endif %}>{{ dept }}</option>
                         {% endfor %}
                     </select>
-                    <div class="error-message" id="departmentError"></div>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="departmentError"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="project">Project</label>
-                    <input type="text" id="project" name="project" value="{{ file.project or '' }}"
-                        placeholder="Enter project name" required>
-                    <div class="error-message" id="projectError"></div>
+                <div class="mb-4">
+                    <label for="project" class="form-label fw-semibold">Project</label>
+                    <input type="text" class="form-control form-control-lg" id="project" name="project" 
+                           value="{{ file.project or '' }}" placeholder="Enter project name" required>
+                    <div class="alert alert-danger mt-2 d-none" role="alert" id="projectError"></div>
                 </div>
-            </div>
 
-            <!-- Form Actions -->
-            <div class="form-actions">
-                <a href="{{ url_for('files') }}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary" id="submitBtn">Update File</button>
-            </div>
-        </form>
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a href="{{ url_for('files') }}" class="btn btn-secondary btn-lg px-5">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">Update File</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Messages Container -->
-    <div id="messageContainer" class="message-container"></div>
+    <div id="messageContainer" class="mt-4"></div>
 </div>
 
 <script>
@@ -87,326 +106,68 @@
         const submitBtn = document.getElementById('submitBtn');
         const messageContainer = document.getElementById('messageContainer');
 
-        // Validation functions
         function validateFileName(fileName) {
-            if (!fileName.trim()) {
-                return "File name cannot be empty";
-            }
-            if (fileName.trim().match(/^\d+$/)) {
-                return "File name cannot be just numbers";
-            }
+            if (!fileName.trim()) return "File name cannot be empty";
+            if (fileName.trim().match(/^\d+$/)) return "File name cannot be just numbers";
             return "";
         }
 
         function validateProject(project) {
-            if (!project.trim()) {
-                return "Project cannot be empty";
-            }
-            if (project.trim().match(/^\d+$/)) {
-                return "Project cannot be just numbers";
-            }
+            if (!project.trim()) return "Project cannot be empty";
+            if (project.trim().match(/^\d+$/)) return "Project cannot be just numbers";
             return "";
         }
 
-        function validateForm() {
-            let isValid = true;
-
-            // Validate file name
-            const fileNameError = validateFileName(fileNameInput.value);
-            const fileNameErrorElement = document.getElementById('fileNameError');
-            if (fileNameError) {
-                fileNameErrorElement.textContent = fileNameError;
-                fileNameErrorElement.style.display = 'block';
-                isValid = false;
+        function showFieldError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('d-none');
             } else {
-                fileNameErrorElement.style.display = 'none';
+                errorEl.classList.add('d-none');
             }
-
-            // Validate project
-            const projectError = validateProject(projectInput.value);
-            const projectErrorElement = document.getElementById('projectError');
-            if (projectError) {
-                projectErrorElement.textContent = projectError;
-                projectErrorElement.style.display = 'block';
-                isValid = false;
-            } else {
-                projectErrorElement.style.display = 'none';
-            }
-
-            return isValid;
         }
 
-        // Real-time validation
         fileNameInput.addEventListener('input', function () {
-            const error = validateFileName(this.value);
-            const errorElement = document.getElementById('fileNameError');
-            if (error) {
-                errorElement.textContent = error;
-                errorElement.style.display = 'block';
-            } else {
-                errorElement.style.display = 'none';
-            }
+            showFieldError('fileName', validateFileName(this.value));
         });
 
         projectInput.addEventListener('input', function () {
-            const error = validateProject(this.value);
-            const errorElement = document.getElementById('projectError');
-            if (error) {
-                errorElement.textContent = error;
-                errorElement.style.display = 'block';
-            } else {
-                errorElement.style.display = 'none';
-            }
+            showFieldError('project', validateProject(this.value));
         });
 
-        // Form submission
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            if (!validateForm()) {
-                showMessage('Please fix the errors above.', 'error');
+            const fileNameError = validateFileName(fileNameInput.value);
+            const projectError = validateProject(projectInput.value);
+
+            showFieldError('fileName', fileNameError);
+            showFieldError('project', projectError);
+
+            if (fileNameError || projectError) {
+                messageContainer.innerHTML = '<div class="alert alert-danger text-center">Please fix the errors above.</div>';
                 return;
             }
 
-            // Disable submit button and show loading
             submitBtn.disabled = true;
             submitBtn.textContent = 'Updating...';
 
-            // Submit form
-            fetch(this.action, {
-                method: 'POST',
-                body: new FormData(this)
-            })
+            fetch(this.action, { method: 'POST', body: new FormData(this) })
                 .then(response => {
                     if (response.ok) {
-                        showMessage('File updated successfully! Redirecting...', 'success');
-                        setTimeout(() => {
-                            window.location.href = "{{ url_for('files') }}";
-                        }, 1500);
+                        messageContainer.innerHTML = '<div class="alert alert-success text-center">File updated successfully! Redirecting...</div>';
+                        setTimeout(() => window.location.href = "{{ url_for('files') }}", 1500);
                     } else {
-                        return response.text().then(text => {
-                            throw new Error(text);
-                        });
+                        return response.text().then(text => { throw new Error(text); });
                     }
                 })
                 .catch(error => {
-                    showMessage('Error: ' + error.message, 'error');
+                    messageContainer.innerHTML = '<div class="alert alert-danger text-center">Error: ' + error.message + '</div>';
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Update File';
                 });
         });
-
-        function showMessage(message, type) {
-            messageContainer.innerHTML = `
-            <div class="message ${type}">
-                ${message}
-            </div>
-        `;
-            messageContainer.style.display = 'block';
-
-            // Auto-hide success messages after 3 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    messageContainer.style.display = 'none';
-                }, 3000);
-            }
-        }
     });
 </script>
-
-<style>
-    .edit-file-container {
-        padding: 30px;
-        background-color: #f8f9fa;
-        min-height: calc(100vh - 100px);
-    }
-
-    .edit-file-container h2 {
-        color: #2f3136;
-        margin-bottom: 30px;
-        font-size: 28px;
-        font-weight: 700;
-        text-align: center;
-    }
-
-    .edit-form-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        padding: 40px;
-        margin-top: 20px;
-    }
-
-    /* Current Info Section */
-    .current-info {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        border-radius: 10px;
-        padding: 25px;
-        margin-bottom: 30px;
-        border: 1px solid #90caf9;
-    }
-
-    .current-info h3 {
-        color: #1565c0;
-        margin-top: 0;
-        margin-bottom: 20px;
-        font-size: 20px;
-        font-weight: 700;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-
-    .info-item {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        border-left: 4px solid #1976d2;
-    }
-
-    .info-item .info-label {
-        display: block;
-        color: #6c757d;
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-    }
-
-    .info-item .info-value {
-        color: #2f3136;
-        font-size: 16px;
-        font-weight: 600;
-    }
-
-    /* Edit Fields Section */
-    .edit-fields {
-        margin-bottom: 30px;
-    }
-
-    .edit-fields h3 {
-        color: #2f3136;
-        margin-bottom: 25px;
-        font-size: 20px;
-        font-weight: 700;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #e9ecef;
-    }
-
-    .form-group {
-        margin-bottom: 25px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #495057;
-        font-weight: 600;
-        font-size: 15px;
-    }
-
-    .form-group input,
-    .form-group select {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #ced4da;
-        border-radius: 8px;
-        font-size: 15px;
-        transition: all 0.3s ease;
-        background-color: white;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-    }
-
-    .error-message {
-        color: #dc3545;
-        font-size: 13px;
-        margin-top: 6px;
-        display: none;
-        padding: 8px 12px;
-        background-color: #f8d7da;
-        border-radius: 6px;
-        border-left: 4px solid #dc3545;
-    }
-
-    /* Form Actions */
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-        padding-top: 25px;
-        border-top: 2px solid #e9ecef;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        padding: 14px 32px;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        min-width: 140px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, #545b62 0%, #3d4348 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
-    }
-
-    /* Message Container */
-    .message-container {
-        margin-top: 20px;
-    }
-
-    .message {
-        padding: 15px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .message.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .message.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-</style>
 {% endblock %}
