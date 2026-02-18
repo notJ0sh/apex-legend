@@ -9,7 +9,7 @@
     <!-- Search and Filter Section -->
     <div class="bg-white rounded-3 p-3 p-md-4 mb-4 shadow-sm">
 
-        <!-- Row 1: Search input + button always together, full width -->
+        <!-- Row 1: Search input + button -->
         <div class="input-group mb-3">
             <input type="text" id="search-input" class="form-control form-control-lg"
                 placeholder="Search by file name..." value="{{ search_query }}">
@@ -18,11 +18,11 @@
             </button>
         </div>
 
-        <!-- Row 2: filters + reset — side by side on md+, stacked on mobile -->
+        <!-- Row 2: Filters + reset — same font size/family as search bar via form-control-lg -->
         <div class="row g-2 align-items-end">
             <div class="col-12 col-md-5">
                 <label for="department-filter" class="form-label fw-semibold small text-uppercase text-muted mb-1">Department</label>
-                <select id="department-filter" class="form-select" onchange="applyFilters()">
+                <select id="department-filter" class="form-select form-select-lg" onchange="applyFilters()">
                     <option value="all">All Departments</option>
                     {% for dept in departments %}
                     <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>{{ dept }}</option>
@@ -31,7 +31,7 @@
             </div>
             <div class="col-12 col-md-4">
                 <label for="file-type-filter" class="form-label fw-semibold small text-uppercase text-muted mb-1">File Type</label>
-                <select id="file-type-filter" class="form-select" onchange="applyFilters()">
+                <select id="file-type-filter" class="form-select form-select-lg" onchange="applyFilters()">
                     <option value="all">All Types</option>
                     {% for type in file_types %}
                     <option value="{{ type }}" {% if selected_file_type==type %}selected{% endif %}>{{ type|upper }}</option>
@@ -39,7 +39,7 @@
                 </select>
             </div>
             <div class="col-12 col-md-3">
-                <button onclick="resetAllFilters()" class="btn btn-danger fw-semibold w-100">
+                <button id="btn-reset-filters" onclick="resetAllFilters()" class="btn btn-danger btn-lg fw-semibold w-100">
                     Reset Filters
                 </button>
             </div>
@@ -49,27 +49,23 @@
     <!-- Files Cards -->
     <div class="mb-4">
         {% if files %}
-        <!-- 1 col phone, 2 col sm tablet, 3 col lg laptop, 4 col xl desktop -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
             {% for file in files %}
             <div class="col">
-                <div class="card h-100 border-0 shadow-sm overflow-hidden"
-                    style="transition: transform 0.2s, box-shadow 0.2s;"
-                    onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
-                    onmouseout="this.style.transform='';this.style.boxShadow=''">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden file-card">
 
                     <!-- Card Header -->
-                    <div class="d-flex align-items-center gap-3 p-3" style="background:#4a4d50;">
-                        <div style="font-size:2.4rem; line-height:1; flex-shrink:0;">{{ get_file_icon(file.file_type) }}</div>
+                    <div class="d-flex align-items-center gap-3 p-3 card-header-bg">
+                        <div class="fs-2 lh-1 flex-shrink-0">{{ get_file_icon(file.file_type) }}</div>
                         <div class="overflow-hidden flex-grow-1">
                             <div class="text-white fw-bold text-truncate small" title="{{ file.file_name }}">
                                 {{ file.file_name|truncate(30) }}
                             </div>
                             <div class="d-flex flex-wrap gap-1 mt-1">
-                                <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2); font-size:10px;">
+                                <span class="badge rounded-pill bg-white bg-opacity-25 text-white" style="font-size:10px;">
                                     {{ file.file_type|upper }}
                                 </span>
-                                <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2); font-size:10px;">
+                                <span class="badge rounded-pill bg-white bg-opacity-25 text-white" style="font-size:10px;">
                                     {% if file.time_stamp %}{{ format_datetime(file.time_stamp) }}{% else %}N/A{% endif %}
                                 </span>
                             </div>
@@ -104,8 +100,7 @@
                     <div class="card-footer bg-light border-top px-3 py-2">
                         <div class="d-flex flex-column flex-sm-row gap-2">
                             <a href="{{ url_for('download_file', filename=file.file_name) }}"
-                                class="btn btn-sm fw-semibold flex-fill text-center"
-                                style="background:#0e5c20; color:white;"
+                                class="btn btn-sm fw-semibold flex-fill text-center btn-download"
                                 title="Download {{ file.file_name }}">
                                 Download
                             </a>
@@ -195,15 +190,28 @@
     }
 </script>
 
-<!-- Colour-only badge classes — cannot be replaced by Bootstrap utilities -->
 <style>
-    .department-hr        { background:#fdcb6e; color:#000; }
-    .department-it        { background:#2177e0; color:#fff; }
-    .department-finance   { background:#0c4919; color:#fff; }
-    .department-logistics { background:#771ccb; color:#fff; }
-    .department-marketing { background:#a50707; color:#fff; }
-    .source-discord       { background:#7753a8; color:#fff; }
-    .source-web           { background:#2177e0; color:#fff; }
+    /* Hover effect for file cards */
+    .file-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .file-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; }
+
+    /* Card header background */
+    .card-header-bg { background: #4a4d50; }
+
+    /* Download button custom green */
+    .btn-download { background: #0e5c20; color: white; }
+    .btn-download:hover { background: #0a4518; color: white; }
+
+    /* Department badge colours — no Bootstrap equivalents */
+    .department-hr        { background: #fdcb6e; color: #000; }
+    .department-it        { background: #2177e0; color: #fff; }
+    .department-finance   { background: #0c4919; color: #fff; }
+    .department-logistics { background: #771ccb; color: #fff; }
+    .department-marketing { background: #a50707; color: #fff; }
+
+    /* Source badge colours */
+    .source-discord { background: #7753a8; color: #fff; }
+    .source-web     { background: #2177e0; color: #fff; }
 </style>
 
 {% endblock %}

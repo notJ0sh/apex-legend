@@ -145,7 +145,7 @@
 
             // Small countdown label in the header
             const indicator = document.createElement('span');
-            indicator.style.cssText = 'font-size:12px; color:#6c757d; margin-right:16px; white-space:nowrap;';
+            indicator.className = 'small text-muted me-3 text-nowrap';;
             const isFeedbackPage = currentPage === 'view_feedback_live';
             const headerDropdown = document.querySelector('header .dropdown');
             if (headerDropdown && !isFeedbackPage) headerDropdown.parentNode.insertBefore(indicator, headerDropdown);
