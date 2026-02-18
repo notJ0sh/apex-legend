@@ -2,6 +2,7 @@
 
 import sqlite3
 import os
+from datetime import datetime
 from flask import g, Flask, Response, send_from_directory
 from models import File
 import requests
@@ -47,6 +48,65 @@ def init_database(db_name: str, schema_file: str, app: Flask) -> None:
         database.commit()
 
 
+# Scan downloads directory and add pre-existing files to database.
+def scan_existing_downloads(app: Flask) -> None:
+    """Scan downloads directory and add pre-existing files to database."""
+    if not os.path.exists(UPLOAD_DIRECTORY):
+        return
+    
+    with app.app_context():
+        database = get_database(FILES_DATABASE)
+        
+        # Get all files already in the database
+        cursor = database.execute('SELECT file_path FROM files')
+        existing_paths = {row['file_path'] for row in cursor.fetchall()}
+        
+        # Scan the downloads directory
+        for filename in os.listdir(UPLOAD_DIRECTORY):
+            file_path = os.path.join(UPLOAD_DIRECTORY, filename)
+            
+            # Skip directories, only process files
+            if not os.path.isfile(file_path):
+                continue
+            
+            # Skip if already in database
+            if file_path in existing_paths:
+                continue
+            
+            # Extract file type from extension
+            file_type = os.path.splitext(filename)[1].lstrip('.').upper()
+            if not file_type:
+                file_type = 'UNKNOWN'
+            
+            # Get file modification time
+            mod_time = os.path.getmtime(file_path)
+            time_stamp = datetime.fromtimestamp(mod_time).isoformat()
+            
+            # Prepare file data
+            file_data = {
+                'file_name': filename,
+                'file_type': file_type,
+                'file_path': file_path,
+                'time_stamp': time_stamp,
+                'user': 'admin123',
+                'department': 'GENERAL',
+                'project': 'GENERAL',
+                'source': 'filesystem'
+            }
+            
+            # Add to database
+            try:
+                columns = ', '.join(file_data.keys())
+                placeholders = ', '.join('?' * len(file_data))
+                sql = f'INSERT INTO files ({columns}) VALUES ({placeholders})'
+                database.execute(sql, tuple(file_data.values()))
+                print(f"✅ Added existing file to database: {filename}")
+            except Exception as e:
+                print(f"❌ Error adding existing file {filename}: {e}")
+        
+        database.commit()
+
+
 # Ensure databases are created if they don't exist.
 def ensure_databases(app: Flask) -> None:
     """Ensures databases are initialized at startup."""
@@ -59,6 +119,8 @@ def ensure_databases(app: Flask) -> None:
         print(f"Creating {FILES_DATABASE}...")
         init_database(FILES_DATABASE, 'files_schema.sql', app)
         print(f"✅ {FILES_DATABASE} created successfully")
+        # Scan for existing files after database creation
+        scan_existing_downloads(app)
 
 
 # Close database connections at the end of request context.
