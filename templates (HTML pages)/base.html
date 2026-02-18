@@ -25,15 +25,6 @@
             </div>
 
             <ul class="nav flex-column mb-auto mt-2">
-                <!-- Dashboard -->
-                <li class="nav-item">
-                    <a href="{{ url_for('dashboard') }}"
-                        class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                        Dashboard
-                    </a>
-                </li>
-
-                <!-- Files -->
                 <li class="nav-item">
                     <a href="{{ url_for('files') }}"
                         class="nav-link {% if request.endpoint == 'files' %}active{% endif %}">
@@ -42,47 +33,46 @@
                 </li>
 
                 {% if current_user.role == 'admin' %}
-                <!-- Manage users -->
                 <li class="nav-item">
-                    <a href="{{ url_for('manage_users') }}"
-                        class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
-                        Manage Users
+                    <a href="{{ url_for('dashboard') }}"
+                        class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        Dashboard
                     </a>
                 </li>
 
-                <!-- View logs -->
-                <!-- <li class="nav-item">
-                    <a href="#" class="nav-link">Logs</a>
-                </li> -->
+                <li class="nav-item">
+                    <a href="{{ url_for('manage_users') }}"
+                        class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
+                        Users
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ url_for('logs') }}"
+                        class="nav-link {% if request.endpoint == 'logs' %}active{% endif %}">
+                        Logs
+                    </a>
+                </li>
                 {% endif %}
 
-                <!-- Settings -->
                 <li class="nav-item">
                     <a href="{{ url_for('settings') }}"
                         class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
                         Settings
                     </a>
                 </li>
-
-                <!-- Logout -->
-                <!-- <li class="nav-item">
-                    <a href="{{ url_for('logout') }}"
-                        class="nav-link {% if request.endpoint == 'logout' %}active{% endif %}">
-                        Logout
-                    </a>
-                </li> -->
             </ul>
         </div>
         {% endif %}
 
-        <div class="d-flex flex-column w-100">
+        <div class="d-flex flex-column w-100" style="height: 100vh; overflow: hidden;">
 
             {% if current_user.is_authenticated and request.endpoint != 'login' and request.endpoint != 'register' %}
             <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center"
-                style="height: 60px;">
+                style="height: 70px; flex-shrink: 0;">
 
                 <div class="text-dark fw-semibold ps-3">
-                    welcome, {{ current_user.username }}
+                    Welcome, {{ current_user.username }}
                 </div>
 
                 <div class="dropdown pe-3">

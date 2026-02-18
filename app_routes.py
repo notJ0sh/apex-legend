@@ -45,31 +45,8 @@ def format_datetime(datetime_str):
 def register_routes(app):
     """Register all routes with the Flask app."""
 
-    @app.route('/')
-    def index():
-        return redirect(url_for('login'))
-
     register_auth_routes(app)
 
-    @app.route('/home')
-    def home():
-        return render_template('dashboard.html')
-    
-    @app.route('/settings')
-    def settings():
-        db = get_database(USER_DATABASE)
-        user_data = db.execute(
-            'SELECT email, phone_number FROM users WHERE id = ?',
-            (current_user.id,)
-        ).fetchone()
-        
-        email = user_data[0] if user_data else None
-        phone_number = user_data[1] if user_data else None
-        
-        return render_template('settings.html', 
-                             user_email=email, 
-                             user_phone=phone_number)
-    
     @app.route('/update-profile', methods=['POST'])
     def update_profile():
         email = request.form.get('email', '').strip()

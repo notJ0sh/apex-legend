@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center text-white" style="height: 70vh;">
+    
+    {% if broadcast_msg %}
+    <div class="alert alert-danger shadow-lg d-flex align-items-center mb-5 w-75 animate-alert" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+        <div>
+            <h4 class="alert-heading fw-bold mb-1">Admin Announcement</h4>
+            <p class="mb-0 fs-5">{{ broadcast_msg }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <h1 class="display-1 fw-bold text-primary text-white">Hello, {{ current_user.username }}!</h1>
+    
+    <p>Welcome to the standard user area.</p>
+    <p>You do not have access to the Admin Dashboard.</p>
+
+</div>
+{% endblock %}
