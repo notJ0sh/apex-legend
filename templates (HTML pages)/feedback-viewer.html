@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Viewer - Apex Legend App{% endblock %}
+
+{% block content %}
+<div id="feedback-viewer-container" class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white fw-bold mb-0">Live Feedback Viewer</h2>
+        <button id="btn-refresh" onclick="location.reload()" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    {% if message %}
+    <div id="feedback-message" class="alert alert-info">{{ message }}</div>
+    {% endif %}
+
+    {% if feedback_data %}
+    <div id="feedback-summary-card" class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-2 px-3">
+            <p class="mb-0 text-muted small">
+                <strong>Total Feedback:</strong>
+                <span class="badge bg-primary ms-1">{{ feedback_data|length }}</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="feedback-table-card" class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div id="feedback-table-wrapper" class="table-responsive" style="max-height:70vh;">
+                <table class="table table-hover table-striped mb-0 small">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width:12%;">Timestamp</th>
+                            <th style="width:8%;">User</th>
+                            <th style="width:8%;">Dept</th>
+                            <th style="width:12%;">Type</th>
+                            <th style="width:15%;">Subject</th>
+                            <th style="width:25%;">Message</th>
+                            <th style="width:8%;">Contact?</th>
+                            <th style="width:12%;">Contact Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in feedback_data %}
+                        <tr>
+                            <td><small>{{ row[0] }}</small></td>
+                            <td>
+                                <strong>{{ row[2] }}</strong>
+                                <br><small class="text-muted">ID: {{ row[1] }}</small>
+                            </td>
+                            <td><small>{{ row[3] }}</small></td>
+                            <td>
+                                {% if row[5] == 'bug' %}
+                                    <span class="badge bg-danger">Bug Report</span>
+                                {% elif row[5] == 'feature' %}
+                                    <span class="badge bg-primary">Feature Request</span>
+                                {% elif row[5] == 'improvement' %}
+                                    <span class="badge bg-info">Improvement</span>
+                                {% elif row[5] == 'other' %}
+                                    <span class="badge bg-secondary">Other</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ row[5]|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ row[6] }}</strong></td>
+                            <td>
+                                <div class="overflow-auto small" style="max-height:60px;">
+                                    {{ row[7] }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if row[8] == 'Yes' %}
+                                    <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-danger">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row[8] == 'Yes' %}
+                                    <small>
+                                        {% if row[9] and row[9] != 'N/A' %}<div>{{ row[9] }}</div>{% endif %}
+                                        {% if row[10] and row[10] != 'N/A' %}<div>{{ row[10] }}</div>{% endif %}
+                                    </small>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

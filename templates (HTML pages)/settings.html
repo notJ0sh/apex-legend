@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Apex Legend App{% endblock %}
+
+{% block content %}
+
+    <!-- Main Content -->
+    <div id="settings-main">
+        <!-- Tabs -->
+        <div id="settings-tabs" class="d-flex bg-light border-bottom px-4">
+            <button id="tab-btn-personal-info" class="tab-btn btn btn-link text-decoration-none px-4 py-3 border-0 border-bottom border-3 fw-semibold fs-6 text-primary active-tab" data-tab="personal-info">
+                My Personal Information
+            </button>
+            <button id="tab-btn-feedback" class="tab-btn btn btn-link text-decoration-none px-4 py-3 border-0 border-bottom border-3 fw-medium fs-6 text-secondary inactive-tab" data-tab="feedback">
+                Feedback
+            </button>
+        </div>
+
+        <div id="settings-content" class="p-4">
+            <!-- Personal Info -->
+            <div id="personal-info" class="content-tab d-block">
+                <div id="personal-info-header" class="mb-4 pb-3 border-bottom">
+                    <h1 class="text-white fw-bold fs-3 mb-1">My Personal Information</h1>
+                    <p class="text-white mb-0">View and manage your account information</p>
+                </div>
+
+                <div id="account-info-card" class="bg-white border rounded-3 p-4 mb-4 shadow-sm">
+                    <h3 class="fw-semibold fs-5 text-dark mb-4">Account Information</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">Username</label>
+                            <div class="fw-medium text-dark">{{ current_user.username }}</div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">User ID</label>
+                            <div class="fw-medium text-dark">#{{ current_user.id }}</div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">Role</label>
+                            <div>
+                                <span id="role-badge" class="badge rounded-pill px-3 py-2 role-badge">
+                                    {% if current_user.role %}
+                                    {{ current_user.role|title }}
+                                    {% elif current_user.user_role %}
+                                    {{ current_user.user_role|title }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">Department</label>
+                            <div class="fw-medium text-dark">
+                                {% if current_user.department %}
+                                {{ current_user.department }}
+                                {% else %}
+                                Not specified
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">Email</label>
+                            <div class="fw-medium text-dark">
+                                {% if user_email %}{{ user_email }}{% else %}Not set{% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            <label class="text-muted small fw-medium d-block mb-1">Phone</label>
+                            <div class="fw-medium text-dark">
+                                {% if user_phone %}{{ user_phone }}{% else %}Not set{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="contact-info-card" class="bg-white border rounded-3 p-4 mb-4 shadow-sm">
+                    <h3 class="fw-semibold fs-5 text-dark mb-4">Contact Information</h3>
+                    <form id="contactForm" action="{{ url_for('update_profile') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium text-secondary small">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control"
+                                value="{% if user_email %}{{ user_email }}{% endif %}"
+                                placeholder="Enter your email address" required>
+                            <div class="form-text">We'll use this email to contact you about your account.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label fw-medium text-secondary small">Phone Number</label>
+                            <input type="tel" id="phone_number" name="phone_number" class="form-control"
+                                value="{% if user_phone %}{{ user_phone }}{% endif %}"
+                                placeholder="Enter 8-digit phone number" pattern="\d{8}"
+                                title="Phone number must be exactly 8 digits (no spaces or +65)" maxlength="8"
+                                oninput="this.value = this.value.replace(/\D/g, '')" required>
+                            <div class="form-text">Enter exactly 8 digits (no spaces or symbols, e.g., 12345678).</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-3 mt-4 pt-4 border-top">
+                            <button type="button" id="btn-reset-contact" class="btn btn-secondary btn-lg px-4 fw-semibold" onclick="resetContactForm()">
+                                Reset
+                            </button>
+                            <button type="submit" id="btn-save-contact" class="btn btn-primary btn-lg px-4 fw-semibold">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Feedback Tab -->
+            <div id="feedback" class="content-tab d-none">
+                <div id="feedback-header" class="mb-4 pb-3 border-bottom">
+                    <h1 class="text-white fw-bold fs-3 mb-1">Feedback</h1>
+                    <p class="text-white mb-0">Help us improve by sharing your thoughts</p>
+                </div>
+
+                <div id="feedback-form-card" class="bg-white border rounded-3 p-4 mb-4 shadow-sm">
+                    <h3 class="fw-semibold fs-5 text-dark mb-4">Send Feedback</h3>
+                    <form id="feedbackForm">
+                        <div class="mb-3">
+                            <label for="feedback_type" class="form-label fw-medium text-secondary small">Feedback Type</label>
+                            <select id="feedback_type" name="feedback_type" class="form-select" required>
+                                <option value="">Select feedback type...</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="improvement">Improvement Suggestion</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-medium text-secondary small">Subject</label>
+                            <input type="text" id="subject" name="subject" class="form-control"
+                                placeholder="Brief description of your feedback"
+                                pattern=".*[a-zA-Z].*"
+                                title="Subject must contain at least one letter — it cannot be numbers only"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label fw-medium text-secondary small">Message</label>
+                            <textarea id="message" name="message" class="form-control"
+                                placeholder="Please provide details about your feedback..." rows="6"
+                                oninput="document.getElementById('message_mirror').value = this.value; document.getElementById('msg_charcount').textContent = this.value.length;"
+                                required></textarea>
+                            <input type="text" id="message_mirror" tabindex="-1"
+                                pattern="(?=.*[a-zA-Z]).{50,}"
+                                title="Message must be at least 50 characters and cannot be numbers only"
+                                class="opacity-0 position-absolute pe-none"
+                                style="width:0; height:0;"
+                                required>
+                            <div class="form-text">Minimum 50 characters. <span id="msg_charcount">0</span> typed.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="include_contact" name="include_contact">
+                                <label class="form-check-label fw-medium" for="include_contact">
+                                    Include my contact information for follow-up
+                                </label>
+                            </div>
+                            <div class="form-text ms-4">We may contact you for more details about your feedback</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-3 mt-4 pt-4 border-top">
+                            <button type="button" id="btn-clear-feedback" class="btn btn-secondary btn-lg px-4 fw-semibold" onclick="resetFeedback()">
+                                Clear Form
+                            </button>
+                            <button type="submit" id="btn-submit-feedback" class="btn btn-primary btn-lg px-4 fw-semibold">
+                                Submit Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="feedback-status-card" class="bg-white border rounded-3 p-4 shadow-sm">
+                    <h3 class="fw-semibold fs-5 text-dark mb-3">Feedback Status</h3>
+                    <div class="text-muted lh-lg">
+                        <p class="mb-2">Your feedback helps us improve the application for everyone.</p>
+                        <p class="mb-0">We review all feedback submissions and will contact you if we need more information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        if (tabButtons.length > 0) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('text-primary', 'active-tab');
+                        btn.classList.add('text-secondary', 'inactive-tab');
+                    });
+                    this.classList.remove('text-secondary', 'inactive-tab');
+                    this.classList.add('text-primary', 'active-tab');
+
+                    document.querySelectorAll('.content-tab').forEach(tab => {
+                        tab.classList.remove('d-block');
+                        tab.classList.add('d-none');
+                    });
+
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.remove('d-none');
+                    document.getElementById(tabId).classList.add('d-block');
+                });
+            });
+
+            const feedbackForm = document.getElementById('feedbackForm');
+            if (feedbackForm) {
+                feedbackForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const includeContact = document.getElementById('include_contact').checked;
+                    formData.set('include_contact', includeContact ? 'true' : 'false');
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+                    fetch('{{ url_for("submit_feedback") }}', { method: 'POST', body: formData })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Thank you for your feedback! Your response has been recorded.');
+                            this.reset();
+                        } else {
+                            return response.text().then(text => { throw new Error(text); });
+                        }
+                    })
+                    .catch(error => { alert('Error submitting feedback: ' + error.message); })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Feedback';
+                    });
+                });
+            }
+        }
+    });
+
+    function resetContactForm() {
+        if (confirm('Reset contact information to current values?')) {
+            document.getElementById('email').value = "{% if user_email %}{{ user_email }}{% endif %}";
+            document.getElementById('phone_number').value = "{% if user_phone %}{{ user_phone }}{% endif %}";
+        }
+    }
+
+    function resetFeedback() {
+        if (confirm('Clear all feedback fields?')) {
+            const form = document.getElementById('feedbackForm');
+            if (form) form.reset();
+        }
+    }
+</script>
+
+<style>
+    /* Tab active/inactive bottom border indicator — only 2 rules that cannot use Bootstrap utilities */
+    .active-tab   { border-bottom: 3px solid #5865f2 !important; background-color: white !important; }
+    .inactive-tab { border-bottom: 3px solid transparent !important; }
+    .role-badge   { background-color: #e7f1ff; color: #5865f2; }
+</style>
+{% endblock %}

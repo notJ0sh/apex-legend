@@ -1,0 +1,210 @@
+/* GLOBAL STYLES */
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4834d4 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+/* SIDEBAR STYLING */
+.sidebar {
+    background-color: #343a40 !important;
+    z-index: 1000;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+/* Logo Area with Blue Underline */
+.sidebar-header {
+    border-bottom: 3px solid #0d6efd; /* The Blue Line */
+    margin-bottom: 10px;
+}
+
+/* SIDEBAR LINKS */
+.nav-link {
+    color: #ccc !important; /* Light grey text */
+    padding: 15px 20px;
+    font-weight: 500;
+    border-radius: 0; /* Square edges like screenshot */
+    transition: background-color 0.2s;
+}
+
+/* Hover State */
+.nav-link:hover {
+    background-color: #495057; /* Slightly lighter grey */
+    color: white !important;
+}
+
+/* Active State (Selected Page) */
+.nav-link.active {
+    background-color: #495057; /* Dark Grey highlight */
+    color: white !important;
+    border-left: 4px solid #0d6efd; /* Optional: Blue marker on left */
+}
+
+/* TOP WHITE BAR */
+header {
+    z-index: 900;
+    position: sticky;
+    top: 0;
+}
+
+/* CARD STYLING */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.card-header {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: bold;
+}
+
+/* TABLES */
+.table {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #212529;
+    color: white;
+}
+
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .filter-row {
+        flex-direction: column;
+    }
+
+    .search-container,
+    .department-filter-container {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .files-container {
+        padding: 20px;
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-actions {
+        flex-direction: column;
+    }
+
+    .download-btn,
+    .edit-btn,
+    .delete-btn {
+        width: 100%;
+    }
+
+    .edit-file-container,
+    .delete-file-container {
+        padding: 15px;
+    }
+
+    .edit-file-container h2,
+    .delete-file-container h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .edit-form-container,
+    .delete-confirmation {
+        padding: 25px;
+    }
+
+    .edit-file-container .info-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .edit-file-container .form-actions,
+    .delete-file-container .action-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .edit-file-container .btn-primary,
+    .edit-file-container .btn-secondary,
+    .delete-file-container .btn-danger,
+    .delete-file-container .btn-secondary {
+        width: 100%;
+        min-width: unset;
+        padding: 14px 20px;
+    }
+
+    .delete-file-container .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .delete-file-container .detail-label {
+        min-width: unset;
+    }
+
+    .delete-file-container .detail-value {
+        text-align: left;
+        padding-left: 0;
+    }
+
+    .delete-file-container .confirmation-input input {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+    .settings-container {
+        flex-direction: column;
+    }
+
+    .settings-sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .files-container h2 {
+        font-size: 24px;
+    }
+
+    .file-card .card-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .file-name-container {
+        text-align: center;
+    }
+
+    .edit-file-container .info-grid,
+    .delete-file-container .file-details {
+        padding: 15px;
+    }
+
+    .edit-file-container .current-info h3,
+    .edit-file-container .edit-fields h3,
+    .delete-file-container .warning-message h3 {
+        font-size: 18px;
+    }
+
+    .edit-file-container .form-group input,
+    .edit-file-container .form-group select {
+        padding: 12px;
+        font-size: 14px;
+    }
+}

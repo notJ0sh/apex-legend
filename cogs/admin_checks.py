@@ -21,10 +21,15 @@ def has_admin_role(member: discord.Member) -> bool:
     return False
 
 
+# admin_checks.py
 def admin_only_check(interaction: discord.Interaction) -> bool:
     """Check that ensures only admin members can run a command."""
     if not isinstance(interaction.user, discord.Member):
-        raise app_commands.CheckFailure("Not a guild member.")
+        raise app_commands.CheckFailure(
+            "This command can only be used in a server.")
+
     if not has_admin_role(interaction.user):
+        # Simply raising this triggers your cog_app_command_error
         raise app_commands.CheckFailure("Missing required admin role.")
+
     return True

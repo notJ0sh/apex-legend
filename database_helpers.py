@@ -108,7 +108,6 @@ def add_data(db_name: str, table: str, data: dict) -> None:
         log_db_entry(data=data)
 
 
-
 # Download file from URL to destination path.
 
 

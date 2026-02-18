@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Delete File - Apex Legend App{% endblock %}
+
+{% block content %}
+<div id="delete-file-container" class="container py-5">
+    <h2 class="text-center text-white fw-bold mb-4">Delete File</h2>
+
+    <div id="delete-file-card" class="card border-0 shadow-lg mx-auto" style="max-width:800px;">
+        <div class="card-body p-4">
+
+            <!-- Warning -->
+            <div id="delete-warning" class="alert alert-warning border-warning border-2 mb-4" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This action cannot be undone!</h4>
+                <p class="mb-0">You are about to permanently delete the following file:</p>
+            </div>
+
+            <!-- File Details -->
+            <div id="file-details" class="bg-light rounded p-4 mb-4 border">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">File Name:</span>
+                            <span class="text-end">{{ file.file_name }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">File Type:</span>
+                            <span class="text-end">{{ file.file_type }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Department:</span>
+                            <span class="text-end">{{ file.department }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Project:</span>
+                            <span class="text-end">{{ file.project or 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Uploaded By:</span>
+                            <span class="text-end">{{ file.user or 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold text-secondary">Date:</span>
+                            <span class="text-end">
+                                {% if file.time_stamp %}{{ format_datetime(file.time_stamp) }}{% else %}N/A{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmation Prompt -->
+            <div id="delete-consequences" class="alert alert-danger border-start border-danger border-4 mb-4" role="alert">
+                <p class="fw-bold mb-2">Are you sure you want to delete this file?</p>
+                <p class="mb-1">This will:</p>
+                <ul class="mb-0">
+                    <li>Permanently remove the file from the database</li>
+                    <li>Delete the actual file from the server</li>
+                    <li>This action cannot be undone</li>
+                </ul>
+            </div>
+
+            <!-- Confirmation Input -->
+            <div id="delete-confirm-group" class="mb-4">
+                <label for="confirmText" class="form-label fw-bold text-center d-block">
+                    Type "DELETE" to confirm:
+                </label>
+                <input type="text" class="form-control form-control-lg text-center text-uppercase fw-bold border-danger border-3"
+                       id="confirmText" placeholder="Type DELETE here">
+                <div class="alert alert-danger mt-2 d-none" role="alert" id="confirmError">
+                    Please type "DELETE" to confirm
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between gap-3 pt-3 border-top">
+                <a href="{{ url_for('files') }}" id="btn-cancel-delete" class="btn btn-secondary btn-lg px-5">Cancel</a>
+                <button id="deleteBtn" class="btn btn-danger btn-lg px-5" disabled>Delete File</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageContainer" class="mt-4"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const confirmInput     = document.getElementById('confirmText');
+        const deleteBtn        = document.getElementById('deleteBtn');
+        const confirmError     = document.getElementById('confirmError');
+        const messageContainer = document.getElementById('messageContainer');
+
+        confirmInput.addEventListener('input', function () {
+            const isConfirmed = this.value.trim().toUpperCase() === 'DELETE';
+            deleteBtn.disabled = !isConfirmed;
+            confirmError.classList.toggle('d-none', isConfirmed);
+        });
+
+        deleteBtn.addEventListener('click', function () {
+            if (!confirm('Are you absolutely sure? This action cannot be undone!')) return;
+
+            deleteBtn.disabled    = true;
+            deleteBtn.textContent = 'Deleting...';
+
+            fetch("{{ url_for('delete_file', file_id=file.id) }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirm: 'DELETE' })
+            })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('File deleted successfully! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = "{{ url_for('files') }}", 1500);
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'danger');
+                deleteBtn.disabled    = false;
+                deleteBtn.textContent = 'Delete File';
+            });
+        });
+
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `<div class="alert alert-${type} text-center" role="alert">${message}</div>`;
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Files - Apex Legend App{% endblock %}
+
+{% block content %}
+<div class="py-3 px-2 px-md-3">
+    <h2 class="text-white fw-bold text-center mb-4">File Repository</h2>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white rounded-3 p-3 p-md-4 mb-4 shadow-sm">
+
+        <!-- Row 1: Search input + button -->
+        <div class="input-group mb-3">
+            <input type="text" id="search-input" class="form-control form-control-lg"
+                placeholder="Search by file name..." value="{{ search_query }}">
+            <button type="button" onclick="applyFilters()" class="btn btn-primary fw-semibold px-3 px-md-4">
+                🔍 Search
+            </button>
+        </div>
+
+        <!-- Row 2: Filters + reset — same font size/family as search bar via form-control-lg -->
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-5">
+                <label for="department-filter" class="form-label fw-semibold small text-uppercase text-muted mb-1">Department</label>
+                <select id="department-filter" class="form-select form-select-lg" onchange="applyFilters()">
+                    <option value="all">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if selected_dept==dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-4">
+                <label for="file-type-filter" class="form-label fw-semibold small text-uppercase text-muted mb-1">File Type</label>
+                <select id="file-type-filter" class="form-select form-select-lg" onchange="applyFilters()">
+                    <option value="all">All Types</option>
+                    {% for type in file_types %}
+                    <option value="{{ type }}" {% if selected_file_type==type %}selected{% endif %}>{{ type|upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <button id="btn-reset-filters" onclick="resetAllFilters()" class="btn btn-danger btn-lg fw-semibold w-100">
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Files Cards -->
+    <div class="mb-4">
+        {% if files %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+            {% for file in files %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden file-card">
+
+                    <!-- Card Header -->
+                    <div class="d-flex align-items-center gap-3 p-3 card-header-bg">
+                        <div class="fs-2 lh-1 flex-shrink-0">{{ get_file_icon(file.file_type) }}</div>
+                        <div class="overflow-hidden flex-grow-1">
+                            <div class="text-white fw-bold text-truncate small" title="{{ file.file_name }}">
+                                {{ file.file_name|truncate(30) }}
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="badge rounded-pill bg-white bg-opacity-25 text-white" style="font-size:10px;">
+                                    {{ file.file_type|upper }}
+                                </span>
+                                <span class="badge rounded-pill bg-white bg-opacity-25 text-white" style="font-size:10px;">
+                                    {% if file.time_stamp %}{{ format_datetime(file.time_stamp) }}{% else %}N/A{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body px-3 py-2 flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Department</span>
+                            <span class="badge rounded-pill fw-semibold department-{{ file.department|lower|replace(' ', '-') }}">
+                                {{ file.department }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Uploaded By</span>
+                            <span class="small fw-medium">{{ file.user or 'N/A' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Project</span>
+                            <span class="small fw-medium text-end" style="max-width:55%;">{{ file.project or 'N/A' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted small fw-semibold">Source</span>
+                            <span class="badge rounded-pill fw-semibold {% if file.source == 'discord' %}source-discord{% else %}source-web{% endif %}">
+                                {{ file.source|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="card-footer bg-light border-top px-3 py-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <a href="{{ url_for('download_file', filename=file.file_name) }}"
+                                class="btn btn-sm fw-semibold flex-fill text-center btn-download"
+                                title="Download {{ file.file_name }}">
+                                Download
+                            </a>
+                            {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('edit_file', file_id=file.id) }}"
+                                class="btn btn-warning btn-sm fw-semibold flex-fill text-dark text-center"
+                                title="Edit {{ file.file_name }}">
+                                Edit
+                            </a>
+                            <a href="{{ url_for('delete_file', file_id=file.id) }}"
+                                class="btn btn-danger btn-sm fw-semibold flex-fill text-center"
+                                title="Delete {{ file.file_name }}"
+                                onclick="return confirmDelete('{{ file.file_name }}', event)">
+                                Delete
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="bg-white rounded-3 p-5 text-center shadow-sm">
+            <p class="text-muted fs-5 mb-0">
+                {% if search_query %}
+                No files found for "{{ search_query }}"
+                {% if selected_dept and selected_dept != 'all' %} in department: {{ selected_dept }}{% endif %}
+                {% if selected_file_type and selected_file_type != 'all' %} of type: {{ selected_file_type|upper }}{% endif %}
+                {% else %}
+                No files found
+                {% if selected_dept and selected_dept != 'all' %} for department: {{ selected_dept }}{% endif %}
+                {% if selected_file_type and selected_file_type != 'all' %} of type: {{ selected_file_type|upper }}{% endif %}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="bg-white rounded-3 p-3 text-center shadow-sm">
+        <p class="text-secondary mb-0 small">
+            Showing <strong class="text-primary">{{ files|length }}</strong> file(s)
+            {% if search_query %} matching "<strong>{{ search_query }}</strong>"{% endif %}
+            {% if selected_dept and selected_dept != 'all' %} in <strong>{{ selected_dept }}</strong>{% endif %}
+            {% if selected_file_type and selected_file_type != 'all' %} of type <strong>{{ selected_file_type|upper }}</strong>{% endif %}
+        </p>
+    </div>
+</div>
+
+<script>
+    function applyFilters() {
+        const selectedDept     = document.getElementById('department-filter').value;
+        const selectedFileType = document.getElementById('file-type-filter').value;
+        const searchQuery      = document.getElementById('search-input').value.trim();
+        let url = "{{ url_for('files') }}";
+        let params = [];
+        if (selectedDept !== 'all')     params.push(`department=${encodeURIComponent(selectedDept)}`);
+        if (selectedFileType !== 'all') params.push(`file_type=${encodeURIComponent(selectedFileType)}`);
+        if (searchQuery)                params.push(`search=${encodeURIComponent(searchQuery)}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        window.location.href = url;
+    }
+
+    function resetAllFilters() {
+        window.location.href = "{{ url_for('files') }}";
+    }
+
+    function confirmDelete(fileName, event) {
+        event.preventDefault();
+        const href = event.target.href;
+        if (confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone!`)) {
+            fetch(href, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.ok) { window.location.reload(); }
+                else { alert('Failed to delete file'); }
+            })
+            .catch(() => alert('Failed to delete file'));
+        }
+        return false;
+    }
+</script>
+
+<style>
+    /* Hover effect for file cards */
+    .file-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .file-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; }
+
+    /* Card header background */
+    .card-header-bg { background: #4a4d50; }
+
+    /* Download button custom green */
+    .btn-download { background: #0e5c20; color: white; }
+    .btn-download:hover { background: #0a4518; color: white; }
+
+    /* Department badge colours — no Bootstrap equivalents */
+    .department-hr        { background: #fdcb6e; color: #000; }
+    .department-it        { background: #2177e0; color: #fff; }
+    .department-finance   { background: #0c4919; color: #fff; }
+    .department-logistics { background: #771ccb; color: #fff; }
+    .department-marketing { background: #a50707; color: #fff; }
+
+    /* Source badge colours */
+    .source-discord { background: #7753a8; color: #fff; }
+    .source-web     { background: #2177e0; color: #fff; }
+</style>
+
+{% endblock %}
