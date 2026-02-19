@@ -153,6 +153,9 @@ if __name__ == '__main__':
     # Initial log entry
     logging.info("Starting Flask Web Server...")
 
-    # Start Flask web server on main thread
-    # use_reloader=False is critical to prevent the bot thread from starting twice
-    app.run(debug=True, use_reloader=False, host='0.0.0.0')
+    # Get the port from Render's environment (defaults to 5000 for local)
+    port = int(os.environ.get("PORT", 5000))
+
+    # Start Flask web server
+    # Set debug=False for the production environment
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=port)
